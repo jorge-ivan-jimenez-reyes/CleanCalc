@@ -41,22 +41,21 @@ function App() {
 
   return (
     <Layout>
-      <div className="mb-8 text-center bg-gradient-to-r from-teal-500 to-blue-500 p-8 rounded-xl text-white shadow-lg">
-        <h1 className="text-4xl font-bold mb-3">Calculadora de Gastos de Limpieza</h1>
-        <p className="text-lg max-w-2xl mx-auto">
-          Compara tus gastos en productos de limpieza tradicionales vs. GECO, y ve cuánto puedes ahorrar
-          en dinero, agua y tiempo.
+      <div className="mb-4 text-center bg-gradient-to-r from-teal-500 to-blue-500 p-3 rounded-md text-white shadow-sm">
+        <h1 className="text-xl font-bold mb-1">Calculadora de Gastos</h1>
+        <p className="text-xs max-w-2xl mx-auto">
+          Compara tus gastos en productos de limpieza tradicionales vs. GECO
         </p>
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+        <div className="lg:col-span-2 space-y-3">
           <LaundryStatsForm onStatsUpdate={setLaundryStats} />
           <ProductForm onAddProduct={handleAddProduct} />
           <ProductList products={products} onRemoveProduct={handleRemoveProduct} />
         </div>
         
-        <div className="space-y-6">
+        <div className="space-y-3">
           <ExpenseSummary summary={expenseSummary} />
           <Tips />
         </div>

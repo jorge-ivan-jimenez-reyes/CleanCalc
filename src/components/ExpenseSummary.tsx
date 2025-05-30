@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ExpenseSummary as ExpenseSummaryType } from '../types';
 import { formatNumber, formatCurrency } from '../utils/calculator';
+import { DollarSign, Droplet, Clock, BarChart } from 'lucide-react';
 
 interface ExpenseSummaryProps {
   summary: ExpenseSummaryType;
@@ -41,56 +42,62 @@ const ExpenseSummary: React.FC<ExpenseSummaryProps> = ({ summary }) => {
     : 0;
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 mb-8">
-      <h2 className="text-xl font-semibold text-gray-800 mb-4">Resumen de Gastos</h2>
+    <div className="bg-white rounded-lg shadow-sm p-3 mb-4 border border-gray-100 transition-all hover:shadow-md overflow-hidden">
+      <div className="flex items-center mb-3">
+        <div className="bg-teal-100 p-1.5 rounded-full mr-2">
+          <BarChart className="w-4 h-4 text-teal-600" />
+        </div>
+        <h2 className="text-base font-semibold text-gray-800">Resumen de Gastos</h2>
+      </div>
       
       {/* Tabs */}
-      <div className="flex mb-6 border-b">
-        <button 
-          onClick={() => setActiveTab('traditional')}
-          className={`px-4 py-2 ${activeTab === 'traditional' ? 'text-teal-700 border-b-2 border-teal-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
-        >
-          Productos Tradicionales
-        </button>
-        <button 
-          onClick={() => setActiveTab('geco')}
-          className={`px-4 py-2 ${activeTab === 'geco' ? 'text-teal-700 border-b-2 border-teal-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
-        >
-          GECO
-        </button>
-        <button 
-          onClick={() => setActiveTab('comparison')}
-          className={`px-4 py-2 ${activeTab === 'comparison' ? 'text-teal-700 border-b-2 border-teal-500 font-medium' : 'text-gray-500 hover:text-gray-700'}`}
-        >
-          Comparación
-        </button>
+      <div className="flex mb-3 border-b overflow-x-auto hide-scrollbar">
+        {[
+          { id: 'traditional', label: 'Productos' },
+          { id: 'geco', label: 'GECO' },
+          { id: 'comparison', label: 'Comparar' }
+        ].map((tab) => (
+          <button 
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id as any)}
+            className={`px-2 py-1.5 text-xs whitespace-nowrap transition-all ${
+              activeTab === tab.id 
+                ? 'text-teal-700 border-b-2 border-teal-500 font-medium' 
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50 rounded-t-lg'
+            }`}
+          >
+            {tab.label}
+          </button>
+        ))}
       </div>
       
       {/* Tradicional */}
       {activeTab === 'traditional' && (
-        <div className="flex flex-col md:flex-row gap-8">
-          <div className="md:w-1/2">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-              <div className="bg-teal-50 rounded-lg p-4">
-                <h3 className="text-2xl font-bold text-teal-700 mb-1">{formatCurrency(summary.totalExpense)}</h3>
-                <p className="text-sm text-gray-500">Gastos Mensuales</p>
+        <div className="flex flex-col lg:flex-row gap-3">
+          <div className="lg:w-1/2">
+            <div className="grid grid-cols-2 gap-2 mb-3">
+              <div className="bg-teal-50 rounded-md p-2 border border-teal-100 flex flex-col items-center justify-center">
+                <DollarSign className="w-3.5 h-3.5 text-teal-600 mb-0.5" />
+                <h3 className="text-base font-bold text-teal-700">{formatCurrency(summary.totalExpense)}</h3>
+                <p className="text-xxs text-gray-500 text-center">Gastos Mensuales</p>
               </div>
-              <div className="bg-purple-50 rounded-lg p-4">
-                <h3 className="text-2xl font-bold text-purple-700 mb-1">{formatCurrency(summary.yearlyExpense)}</h3>
-                <p className="text-sm text-gray-500">Gastos Anuales</p>
+              <div className="bg-purple-50 rounded-md p-2 border border-purple-100 flex flex-col items-center justify-center">
+                <DollarSign className="w-3.5 h-3.5 text-purple-600 mb-0.5" />
+                <h3 className="text-base font-bold text-purple-700">{formatCurrency(summary.yearlyExpense)}</h3>
+                <p className="text-xxs text-gray-500 text-center">Gastos Anuales</p>
               </div>
             </div>
             
-            <div className="space-y-4">
+            <div className="space-y-2">
               {categories.map((category, index) => (
-                <div key={index}>
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm font-medium text-gray-700">{category.name}</span>
-                    <span className="text-sm font-semibold text-gray-900">{formatCurrency(category.value)}</span>
+                <div key={index} className="p-1.5 rounded-md border border-gray-100 hover:bg-gray-50 transition-colors">
+                  <div className="flex justify-between items-center mb-0.5">
+                    <span className="text-xs font-medium text-gray-700">{category.name}</span>
+                    <span className="text-xxs font-semibold text-gray-900 bg-gray-100 px-1.5 py-0.5 rounded-full">{formatCurrency(category.value)}</span>
                   </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2.5">
+                  <div className="w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
                     <div 
-                      className={`${category.color} h-2.5 rounded-full transition-all duration-500 ease-out`} 
+                      className={`${category.color} h-1.5 rounded-full transition-all duration-500 ease-out`} 
                       style={{ width: `${category.percentage}%` }}
                     ></div>
                   </div>
@@ -99,21 +106,31 @@ const ExpenseSummary: React.FC<ExpenseSummaryProps> = ({ summary }) => {
             </div>
           </div>
           
-          <div className="md:w-1/2">
-            <div className="bg-gray-50 rounded-lg p-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Estadísticas Anuales</h3>
-              <div className="space-y-3">
-                <div>
-                  <p className="text-sm text-gray-600">Consumo de Agua</p>
-                  <p className="text-xl font-semibold text-blue-600">
-                    {formatNumber(summary.yearlyWaterUsage, 'litros')}
-                  </p>
+          <div className="lg:w-1/2">
+            <div className="bg-gray-50 rounded-md p-2.5 border border-gray-100">
+              <h3 className="text-xs font-semibold text-gray-800 mb-2">Estadísticas Anuales</h3>
+              <div className="space-y-2">
+                <div className="flex items-center bg-white rounded-md p-2 border border-gray-100">
+                  <div className="bg-blue-100 p-1.5 rounded-full mr-2">
+                    <Droplet className="w-3.5 h-3.5 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-xxs text-gray-600">Consumo de Agua</p>
+                    <p className="text-xs font-semibold text-blue-600">
+                      {formatNumber(summary.yearlyWaterUsage, 'litros')}
+                    </p>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-600">Tiempo Invertido</p>
-                  <p className="text-xl font-semibold text-purple-600">
-                    {formatNumber(summary.yearlyTimeSpent, 'horas')}
-                  </p>
+                <div className="flex items-center bg-white rounded-md p-2 border border-gray-100">
+                  <div className="bg-purple-100 p-1.5 rounded-full mr-2">
+                    <Clock className="w-3.5 h-3.5 text-purple-600" />
+                  </div>
+                  <div>
+                    <p className="text-xxs text-gray-600">Tiempo Invertido</p>
+                    <p className="text-xs font-semibold text-purple-600">
+                      {formatNumber(summary.yearlyTimeSpent, 'horas')}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -123,99 +140,156 @@ const ExpenseSummary: React.FC<ExpenseSummaryProps> = ({ summary }) => {
       
       {/* GECO */}
       {activeTab === 'geco' && (
-        <div className="flex flex-col gap-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-green-50 rounded-lg p-4">
-              <h3 className="text-2xl font-bold text-green-700 mb-1">{formatCurrency(summary.gecoYearlyExpense)}</h3>
-              <p className="text-sm text-gray-500">Gasto Anual con GECO</p>
+        <div className="flex flex-col gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="bg-green-50 rounded-md p-2 border border-green-100 flex flex-col items-center">
+              <DollarSign className="w-3.5 h-3.5 text-green-600 mb-0.5" />
+              <h3 className="text-base font-bold text-green-700">{formatCurrency(summary.gecoYearlyExpense)}</h3>
+              <p className="text-xxs text-gray-500 text-center">Gasto Anual</p>
             </div>
-            <div className="bg-blue-50 rounded-lg p-4">
-              <h3 className="text-2xl font-bold text-blue-700 mb-1">
+            <div className="bg-blue-50 rounded-md p-2 border border-blue-100 flex flex-col items-center">
+              <Droplet className="w-3.5 h-3.5 text-blue-600 mb-0.5" />
+              <h3 className="text-base font-bold text-blue-700">
                 {formatNumber(summary.gecoYearlyWaterUsage, 'litros')}
               </h3>
-              <p className="text-sm text-gray-500">Consumo Anual de Agua</p>
+              <p className="text-xxs text-gray-500 text-center">Agua Anual</p>
             </div>
-            <div className="bg-amber-50 rounded-lg p-4">
-              <h3 className="text-2xl font-bold text-amber-700 mb-1">
+            <div className="bg-amber-50 rounded-md p-2 border border-amber-100 flex flex-col items-center">
+              <Clock className="w-3.5 h-3.5 text-amber-600 mb-0.5" />
+              <h3 className="text-base font-bold text-amber-700">
                 {formatNumber(summary.gecoYearlyTimeSpent, 'horas')}
               </h3>
-              <p className="text-sm text-gray-500">Tiempo Anual Invertido</p>
+              <p className="text-xxs text-gray-500 text-center">Tiempo Anual</p>
             </div>
           </div>
           
-          <div className="bg-gray-50 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Detalles del Cálculo</h3>
-            <div className="space-y-2 text-sm">
-              <p>• Costo inicial: {formatCurrency(2000)}</p>
-              <p>• Costo por carga: {formatCurrency(20)} por carga</p>
-              <p>• Reducción de tiempo: 30 minutos menos por carga</p>
-              <p>• Reducción de agua: 50% menos de consumo de agua</p>
+          <div className="bg-gray-50 rounded-md p-2.5 border border-gray-100">
+            <h3 className="text-xs font-semibold text-gray-800 mb-2">Detalles del Cálculo</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xxs">
+              <div className="flex items-center bg-white p-1.5 rounded-md border border-gray-100">
+                <DollarSign className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
+                <p>Costo inicial: {formatCurrency(2000)}</p>
+              </div>
+              <div className="flex items-center bg-white p-1.5 rounded-md border border-gray-100">
+                <DollarSign className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
+                <p>Costo por carga: {formatCurrency(20)}</p>
+              </div>
+              <div className="flex items-center bg-white p-1.5 rounded-md border border-gray-100">
+                <Clock className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
+                <p>-30 min por carga</p>
+              </div>
+              <div className="flex items-center bg-white p-1.5 rounded-md border border-gray-100">
+                <Droplet className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
+                <p>-50% consumo agua</p>
+              </div>
             </div>
           </div>
         </div>
       )}
       
-      {/* Comparación */}
+      {/* Comparación - Optimizada */}
       {activeTab === 'comparison' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="bg-green-50 rounded-lg p-4">
-              <div className="flex justify-between items-center mb-1">
-                <h3 className="text-lg font-semibold text-green-700">Ahorro Monetario</h3>
-                <span className="text-sm font-bold bg-green-100 text-green-800 px-2 py-1 rounded">
-                  {moneyPercentage > 0 ? `${moneyPercentage.toFixed(0)}%` : '0%'}
-                </span>
-              </div>
-              <p className="text-2xl font-bold text-green-700 mb-1">
+        <div className="space-y-3">
+          {/* Ahorro Monetario */}
+          <div className="flex">
+            <div className="w-1/3 bg-green-50 rounded-md p-2 border border-green-100 flex flex-col justify-center">
+              <h3 className="text-xs font-semibold text-green-700 flex items-center justify-between">
+                <span>Ahorro</span>
+                {moneyPercentage > 0 && (
+                  <span className="text-xxs font-bold bg-green-100 text-green-800 px-1 py-0.5 rounded-full ml-1">
+                    {moneyPercentage > 0 ? `${moneyPercentage.toFixed(0)}%` : '0%'}
+                  </span>
+                )}
+              </h3>
+              <p className="text-base font-bold text-green-700">
                 {formatCurrency(Math.max(0, summary.savedMoney))}
               </p>
-              <div className="flex justify-between text-sm">
-                <span>Tradicional: {formatCurrency(summary.yearlyExpense)}</span>
-                <span>GECO: {formatCurrency(summary.gecoYearlyExpense)}</span>
-              </div>
             </div>
-            
-            <div className="bg-blue-50 rounded-lg p-4">
-              <div className="flex justify-between items-center mb-1">
-                <h3 className="text-lg font-semibold text-blue-700">Ahorro de Agua</h3>
-                <span className="text-sm font-bold bg-blue-100 text-blue-800 px-2 py-1 rounded">
-                  {waterPercentage > 0 ? `${waterPercentage.toFixed(0)}%` : '0%'}
-                </span>
+            <div className="w-2/3 ml-2">
+              <div className="bg-white rounded-md p-2 border border-gray-100 mb-1.5">
+                <p className="text-xxs text-gray-500 mb-0.5">Tradicional:</p>
+                <div className="flex items-center">
+                  <DollarSign className="h-3 w-3 mr-1 text-gray-600" />
+                  <span className="text-xs font-medium">{formatCurrency(summary.yearlyExpense)}</span>
+                </div>
               </div>
-              <p className="text-2xl font-bold text-blue-700 mb-1">
-                {formatNumber(Math.max(0, summary.savedWater), 'litros')}
-              </p>
-              <div className="flex justify-between text-sm">
-                <span>Tradicional: {formatNumber(summary.yearlyWaterUsage, 'l')}</span>
-                <span>GECO: {formatNumber(summary.gecoYearlyWaterUsage, 'l')}</span>
-              </div>
-            </div>
-            
-            <div className="bg-amber-50 rounded-lg p-4">
-              <div className="flex justify-between items-center mb-1">
-                <h3 className="text-lg font-semibold text-amber-700">Ahorro de Tiempo</h3>
-                <span className="text-sm font-bold bg-amber-100 text-amber-800 px-2 py-1 rounded">
-                  {timePercentage > 0 ? `${timePercentage.toFixed(0)}%` : '0%'}
-                </span>
-              </div>
-              <p className="text-2xl font-bold text-amber-700 mb-1">
-                {formatNumber(Math.max(0, summary.savedTime), 'horas')}
-              </p>
-              <div className="flex justify-between text-sm">
-                <span>Tradicional: {formatNumber(summary.yearlyTimeSpent, 'h')}</span>
-                <span>GECO: {formatNumber(summary.gecoYearlyTimeSpent, 'h')}</span>
+              <div className="bg-white rounded-md p-2 border border-gray-100">
+                <p className="text-xxs text-gray-500 mb-0.5">GECO:</p>
+                <div className="flex items-center">
+                  <DollarSign className="h-3 w-3 mr-1 text-green-600" />
+                  <span className="text-xs font-medium">{formatCurrency(summary.gecoYearlyExpense)}</span>
+                </div>
               </div>
             </div>
           </div>
           
-          <div className="bg-teal-50 rounded-lg p-4">
-            <h3 className="text-lg font-semibold text-teal-800 mb-2">Impacto Ambiental</h3>
-            <p className="text-sm text-teal-700">
-              Usando GECO, ahorrarías aproximadamente {formatNumber(summary.savedWater, 'litros')} de agua al año, 
-              contribuyendo significativamente a la conservación del agua potable. Además, reducirías el uso de 
-              productos químicos que eventualmente terminan en el sistema de aguas residuales.
-            </p>
+          {/* Ahorro de Agua */}
+          <div className="flex">
+            <div className="w-1/3 bg-blue-50 rounded-md p-2 border border-blue-100 flex flex-col justify-center">
+              <h3 className="text-xs font-semibold text-blue-700 flex items-center justify-between">
+                <span>Agua</span>
+                {waterPercentage > 0 && (
+                  <span className="text-xxs font-bold bg-blue-100 text-blue-800 px-1 py-0.5 rounded-full ml-1">
+                    {waterPercentage > 0 ? `${waterPercentage.toFixed(0)}%` : '0%'}
+                  </span>
+                )}
+              </h3>
+              <p className="text-base font-bold text-blue-700">
+                {formatNumber(Math.max(0, summary.savedWater), 'l')}
+              </p>
+            </div>
+            <div className="w-2/3 ml-2">
+              <div className="bg-white rounded-md p-2 border border-gray-100 mb-1.5">
+                <p className="text-xxs text-gray-500 mb-0.5">Tradicional:</p>
+                <div className="flex items-center">
+                  <Droplet className="h-3 w-3 mr-1 text-gray-600" />
+                  <span className="text-xs font-medium">{formatNumber(summary.yearlyWaterUsage, 'l')}</span>
+                </div>
+              </div>
+              <div className="bg-white rounded-md p-2 border border-gray-100">
+                <p className="text-xxs text-gray-500 mb-0.5">GECO:</p>
+                <div className="flex items-center">
+                  <Droplet className="h-3 w-3 mr-1 text-blue-600" />
+                  <span className="text-xs font-medium">{formatNumber(summary.gecoYearlyWaterUsage, 'l')}</span>
+                </div>
+              </div>
+            </div>
           </div>
+          
+          {/* Ahorro de Tiempo */}
+          <div className="flex">
+            <div className="w-1/3 bg-amber-50 rounded-md p-2 border border-amber-100 flex flex-col justify-center">
+              <h3 className="text-xs font-semibold text-amber-700 flex items-center justify-between">
+                <span>Tiempo</span>
+                {timePercentage > 0 && (
+                  <span className="text-xxs font-bold bg-amber-100 text-amber-800 px-1 py-0.5 rounded-full ml-1">
+                    {timePercentage > 0 ? `${timePercentage.toFixed(0)}%` : '0%'}
+                  </span>
+                )}
+              </h3>
+              <p className="text-base font-bold text-amber-700">
+                {formatNumber(Math.max(0, summary.savedTime), 'h')}
+              </p>
+            </div>
+            <div className="w-2/3 ml-2">
+              <div className="bg-white rounded-md p-2 border border-gray-100 mb-1.5">
+                <p className="text-xxs text-gray-500 mb-0.5">Tradicional:</p>
+                <div className="flex items-center">
+                  <Clock className="h-3 w-3 mr-1 text-gray-600" />
+                  <span className="text-xs font-medium">{formatNumber(summary.yearlyTimeSpent, 'h')}</span>
+                </div>
+              </div>
+              <div className="bg-white rounded-md p-2 border border-gray-100">
+                <p className="text-xxs text-gray-500 mb-0.5">GECO:</p>
+                <div className="flex items-center">
+                  <Clock className="h-3 w-3 mr-1 text-amber-600" />
+                  <span className="text-xs font-medium">{formatNumber(summary.gecoYearlyTimeSpent, 'h')}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          {/* Impacto Ambiental - Ocultado por espacio */}
         </div>
       )}
     </div>
