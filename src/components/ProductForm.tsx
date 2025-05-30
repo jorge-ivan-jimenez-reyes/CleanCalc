@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product, productDurations } from '../types';
-import { PlusCircle, Search, Package, DollarSign, Timer, Repeat } from 'lucide-react';
+import { PlusCircle, Search, Package, DollarSign, Timer, Repeat, Filter, AlertCircle } from 'lucide-react';
 import { commonProducts, ProductDatabase } from '../data/products';
+import { loadAllExternalProducts, loadLocalCSVFiles } from '../utils/csvLoader';
 
 interface ProductFormProps {
   onAddProduct: (product: Product) => void;
@@ -10,6 +11,11 @@ interface ProductFormProps {
 const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
   const [showProductList, setShowProductList] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedBrand, setSelectedBrand] = useState<string>('all');
+  const [externalProducts, setExternalProducts] = useState<ProductDatabase[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [product, setProduct] = useState<Omit<Product, 'id'>>({
     name: '',
     price: 0,
@@ -18,6 +24,46 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
     category: 'detergent',
     duration: '1month',
   });
+  
+  // Cargar productos desde archivos CSV externos
+  useEffect(() => {
+    const loadProducts = async () => {
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Intentar cargar productos externos
+        console.log('Cargando productos desde archivos CSV externos...');
+        const products = await loadAllExternalProducts();
+        
+        if (products.length > 0) {
+          console.log(`Cargados ${products.length} productos externos con éxito.`);
+          setExternalProducts(products);
+        } else {
+          // Intentar cargar desde archivos locales como respaldo
+          console.log('No se pudieron cargar productos externos. Intentando respaldo...');
+          const localProducts = await loadLocalCSVFiles();
+          
+          if (localProducts.length > 0) {
+            console.log(`Cargados ${localProducts.length} productos locales como respaldo.`);
+            setExternalProducts(localProducts);
+          } else {
+            // Usar productos predefinidos como último recurso
+            console.log('Usando productos predefinidos como último recurso.');
+            setExternalProducts(commonProducts);
+          }
+        }
+      } catch (err) {
+        console.error('Error al cargar productos:', err);
+        setError('No se pudieron cargar los productos. Usando datos predefinidos.');
+        setExternalProducts(commonProducts);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadProducts();
+  }, []);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,8 +108,14 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
     setShowProductList(false);
   };
 
+  // Productos a mostrar: externos o predefinidos
+  const productsToUse = externalProducts.length > 0 ? externalProducts : commonProducts;
+
+  // Obtener todas las marcas únicas para el filtro
+  const allBrands = Array.from(new Set(productsToUse.map(product => product.brand)));
+
   // Agrupar productos por marca y tipo
-  const groupedProducts = commonProducts.reduce((acc, product) => {
+  const groupedProducts = productsToUse.reduce((acc, product) => {
     const key = `${product.brand}-${product.name}`;
     if (!acc[key]) {
       acc[key] = [];
@@ -72,27 +124,59 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
     return acc;
   }, {} as Record<string, ProductDatabase[]>);
 
-  // Filtrar grupos por término de búsqueda
+  // Filtrar grupos por término de búsqueda, categoría y marca seleccionada
   const filteredGroups = Object.entries(groupedProducts)
-    .filter(([key]) => {
+    .filter(([key, products]) => {
       const [brand, name] = key.split('-');
-      return `${brand} ${name}`.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Filtrar por término de búsqueda
+      const matchesSearch = `${brand} ${name}`.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      // Filtrar por categoría
+      const matchesCategory = selectedCategory === 'all' || 
+        products.some(p => p.category === selectedCategory);
+      
+      // Filtrar por marca
+      const matchesBrand = selectedBrand === 'all' || brand === selectedBrand;
+      
+      return matchesSearch && matchesCategory && matchesBrand;
     })
     .reduce((acc, [key, products]) => {
-      acc[key] = products;
+      // Si hay filtro de categoría, filtrar productos dentro del grupo
+      if (selectedCategory !== 'all') {
+        const filteredProducts = products.filter(p => p.category === selectedCategory);
+        if (filteredProducts.length > 0) {
+          acc[key] = filteredProducts;
+        }
+      } else {
+        acc[key] = products;
+      }
       return acc;
     }, {} as Record<string, ProductDatabase[]>);
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 transition-all hover:shadow-lg border border-gray-100">
-      <div className="flex items-center mb-6">
+    <div className="bg-white rounded-lg shadow-sm p-4 transition-all hover:shadow-md border border-gray-100">
+      <div className="flex items-center mb-4">
         <div className="bg-blue-100 p-2 rounded-full mr-3">
-          <Package className="w-6 h-6 text-blue-600" />
+          <Package className="w-5 h-5 text-blue-600" />
         </div>
-        <h2 className="text-xl font-semibold text-gray-800">Agregar Nuevo Producto</h2>
+        <h2 className="text-lg font-semibold text-gray-800">Agregar Nuevo Producto</h2>
       </div>
       
-      <div className="mb-6">
+      {loading && (
+        <div className="bg-blue-50 p-2 rounded-md mb-3 text-center text-xs text-blue-600">
+          <div className="animate-pulse">Cargando productos...</div>
+        </div>
+      )}
+      
+      {error && (
+        <div className="bg-amber-50 p-2 rounded-md mb-3 flex items-start text-xs">
+          <AlertCircle className="w-3.5 h-3.5 text-amber-500 mr-1.5 mt-0.5 flex-shrink-0" />
+          <p className="text-amber-700">{error}</p>
+        </div>
+      )}
+      
+      <div className="mb-4">
         <div className="relative">
           <input
             type="text"
@@ -100,41 +184,79 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             onFocus={() => setShowProductList(true)}
-            className="w-full px-4 py-3 pl-12 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50"
+            className="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-50 text-sm"
           />
-          <Search className="absolute left-4 top-3.5 h-5 w-5 text-gray-400" />
+          <Search className="absolute left-3 top-2.5 h-4 w-4 text-gray-400" />
         </div>
         
         {showProductList && (
-          <div className="absolute z-10 mt-2 w-full max-w-2xl bg-white rounded-lg shadow-xl border border-gray-200">
-            <div className="max-h-72 overflow-auto">
-              {Object.entries(filteredGroups).map(([key, products]) => (
-                <div key={key} className="border-b border-gray-100 py-3 px-4 hover:bg-gray-50">
-                  <div className="font-medium text-gray-800 flex items-center">
-                    <span className="px-2 py-0.5 rounded bg-blue-100 text-blue-800 text-xs mr-2">{products[0].brand}</span>
+          <div className="absolute z-10 mt-1 w-full max-w-2xl bg-white rounded-lg shadow-xl border border-gray-200">
+            <div className="flex border-b border-gray-100 p-2 bg-gray-50">
+              <div className="flex items-center">
+                <Filter className="h-3.5 w-3.5 text-gray-500 mr-1.5" />
+                <span className="text-xs text-gray-600 mr-2">Filtros:</span>
+              </div>
+              
+              <select 
+                value={selectedCategory} 
+                onChange={(e) => setSelectedCategory(e.target.value)}
+                className="text-xs border border-gray-200 rounded px-2 py-1 mr-2 bg-white"
+              >
+                <option value="all">Todas las categorías</option>
+                <option value="detergent">Detergentes</option>
+                <option value="softener">Suavizantes</option>
+                <option value="disinfectant">Desinfectantes</option>
+                <option value="enhancer">Potenciadores</option>
+              </select>
+              
+              <select 
+                value={selectedBrand} 
+                onChange={(e) => setSelectedBrand(e.target.value)}
+                className="text-xs border border-gray-200 rounded px-2 py-1 bg-white"
+              >
+                <option value="all">Todas las marcas</option>
+                {allBrands.map((brand) => (
+                  <option key={brand} value={brand}>{brand}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div className="max-h-64 overflow-auto">
+              {!loading && Object.entries(filteredGroups).map(([key, products]) => (
+                <div key={key} className="border-b border-gray-100 py-2 px-3 hover:bg-gray-50">
+                  <div className="font-medium text-gray-800 flex items-center text-sm">
+                    <span className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 text-xxs mr-2">{products[0].brand}</span>
                     {products[0].name}
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mt-1.5">
                     {products.map((p, idx) => (
                       <button
                         key={idx}
                         onClick={() => handleProductSelect(p)}
-                        className="text-left px-3 py-2 text-sm rounded-lg bg-white border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors"
+                        className="text-left px-2 py-1.5 text-xs rounded-md bg-white border border-gray-100 hover:border-blue-200 hover:bg-blue-50 transition-colors"
                       >
                         <div className="flex justify-between">
                           <span className="font-medium">{p.type}</span>
                           <span className="text-blue-600 font-medium">${p.price.toFixed(2)}</span>
                         </div>
-                        <div className="text-xs text-gray-500">{p.size} {p.unit}</div>
+                        <div className="text-xxs text-gray-500">{p.size} {p.unit} - {getCategoryLabel(p.category)}</div>
                       </button>
                     ))}
                   </div>
                 </div>
               ))}
-              {Object.keys(filteredGroups).length === 0 && (
-                <div className="py-4 px-4 text-gray-500 text-center">
-                  <Search className="h-8 w-8 mx-auto text-gray-300 mb-2" />
-                  No se encontraron productos. Intenta con otro término.
+              
+              {!loading && Object.keys(filteredGroups).length === 0 && (
+                <div className="py-3 px-3 text-gray-500 text-center text-sm">
+                  <Search className="h-6 w-6 mx-auto text-gray-300 mb-1" />
+                  No se encontraron productos. Intenta con otro término o filtro.
+                </div>
+              )}
+              
+              {loading && (
+                <div className="py-8 px-3 text-gray-500 text-center">
+                  <div className="animate-spin h-8 w-8 border-4 border-blue-200 border-t-blue-600 rounded-full mx-auto mb-2"></div>
+                  <p className="text-sm">Cargando productos...</p>
                 </div>
               )}
             </div>
@@ -142,12 +264,12 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-            <div className="flex items-center mb-3">
-              <Package className="w-4 h-4 text-gray-500 mr-2" />
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
+            <div className="flex items-center mb-2">
+              <Package className="w-3.5 h-3.5 text-gray-500 mr-1.5" />
+              <label htmlFor="name" className="block text-xs font-medium text-gray-700">
                 Nombre del Producto
               </label>
             </div>
@@ -157,15 +279,15 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
               name="name"
               value={product.name}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               placeholder="ej., MAS Original"
               required
             />
           </div>
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-            <div className="flex items-center mb-3">
-              <Search className="w-4 h-4 text-gray-500 mr-2" />
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+          <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
+            <div className="flex items-center mb-2">
+              <Search className="w-3.5 h-3.5 text-gray-500 mr-1.5" />
+              <label htmlFor="category" className="block text-xs font-medium text-gray-700">
                 Categoría
               </label>
             </div>
@@ -174,7 +296,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
               name="category"
               value={product.category}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
             >
               <option value="detergent">Detergente</option>
               <option value="softener">Suavizante</option>
@@ -184,11 +306,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-            <div className="flex items-center mb-3">
-              <DollarSign className="w-4 h-4 text-gray-500 mr-2" />
-              <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
+            <div className="flex items-center mb-2">
+              <DollarSign className="w-3.5 h-3.5 text-gray-500 mr-1.5" />
+              <label htmlFor="price" className="block text-xs font-medium text-gray-700">
                 Precio ($)
               </label>
             </div>
@@ -198,17 +320,17 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
               name="price"
               value={product.price || ''}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               min="0.01"
               step="0.01"
               placeholder="0.00"
               required
             />
           </div>
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-            <div className="flex items-center mb-3">
-              <Timer className="w-4 h-4 text-gray-500 mr-2" />
-              <label htmlFor="duration" className="block text-sm font-medium text-gray-700">
+          <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
+            <div className="flex items-center mb-2">
+              <Timer className="w-3.5 h-3.5 text-gray-500 mr-1.5" />
+              <label htmlFor="duration" className="block text-xs font-medium text-gray-700">
                 ¿Cuánto te dura el producto?
               </label>
             </div>
@@ -217,7 +339,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
               name="duration"
               value={product.duration}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               required
             >
               {productDurations.map((duration) => (
@@ -229,11 +351,11 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
           </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-            <div className="flex items-center mb-3">
-              <Package className="w-4 h-4 text-gray-500 mr-2" />
-              <label htmlFor="quantity" className="block text-sm font-medium text-gray-700">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
+            <div className="flex items-center mb-2">
+              <Package className="w-3.5 h-3.5 text-gray-500 mr-1.5" />
+              <label htmlFor="quantity" className="block text-xs font-medium text-gray-700">
                 Usos por Envase
               </label>
             </div>
@@ -243,16 +365,16 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
               name="quantity"
               value={product.quantity || 1}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               min="1"
               required
             />
           </div>
-          <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-            <div className="flex items-center mb-3">
-              <Repeat className="w-4 h-4 text-gray-500 mr-2" />
-              <label htmlFor="usageFrequency" className="block text-sm font-medium text-gray-700">
-                Usos por Mes
+          <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
+            <div className="flex items-center mb-2">
+              <Repeat className="w-3.5 h-3.5 text-gray-500 mr-1.5" />
+              <label htmlFor="usageFrequency" className="block text-xs font-medium text-gray-700">
+                Frecuencia de Uso (veces por mes)
               </label>
             </div>
             <input
@@ -261,23 +383,36 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
               name="usageFrequency"
               value={product.usageFrequency || 1}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
               min="1"
               required
             />
           </div>
         </div>
         
-        <button
-          type="submit"
-          className="w-full flex items-center justify-center px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-        >
-          <PlusCircle className="w-5 h-5 mr-2" />
-          Agregar Producto
-        </button>
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors flex items-center text-sm"
+          >
+            <PlusCircle className="w-4 h-4 mr-2" />
+            Agregar Producto
+          </button>
+        </div>
       </form>
     </div>
   );
+};
+
+// Helper function to convertir categoría a etiqueta en español
+const getCategoryLabel = (category: string): string => {
+  switch (category) {
+    case 'detergent': return 'Detergente';
+    case 'softener': return 'Suavizante';
+    case 'disinfectant': return 'Desinfectante';
+    case 'enhancer': return 'Potenciador';
+    default: return category;
+  }
 };
 
 export default ProductForm;
