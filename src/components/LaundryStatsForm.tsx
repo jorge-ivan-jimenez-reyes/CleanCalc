@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { LaundryStats } from '../types';
-import { WashingMachine, Droplets, Clock } from 'lucide-react';
+import { WashingMachine } from 'lucide-react';
 
 interface LaundryStatsFormProps {
   onStatsUpdate: (stats: LaundryStats) => void;
@@ -9,8 +9,8 @@ interface LaundryStatsFormProps {
 const LaundryStatsForm: React.FC<LaundryStatsFormProps> = ({ onStatsUpdate }) => {
   const [stats, setStats] = useState<LaundryStats>({
     loadsPerWeek: 3,
-    timePerLoad: 80, // 80 minutos por defecto (requisito)
-    waterPerLoad: 60 // 60 litros por defecto (requisito)
+    timePerLoad: 80, // Fijo en 80 minutos
+    waterPerLoad: 95 // Fijo en 95 litros
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -24,17 +24,17 @@ const LaundryStatsForm: React.FC<LaundryStatsFormProps> = ({ onStatsUpdate }) =>
   };
 
   return (
-    <div className="bg-white rounded-xl shadow-md p-6 transition-all hover:shadow-lg border border-gray-100">
-      <div className="flex items-center mb-6">
+    <div className="bg-white rounded-lg shadow-sm p-4 transition-all hover:shadow-md border border-gray-100">
+      <div className="flex items-center mb-4">
         <div className="bg-teal-100 p-2 rounded-full mr-3">
-          <WashingMachine className="w-6 h-6 text-teal-600" />
+          <WashingMachine className="w-5 h-5 text-teal-600" />
         </div>
-        <h2 className="text-xl font-semibold text-gray-800">Hábitos de Lavado</h2>
+        <h2 className="text-lg font-semibold text-gray-800">Hábitos de Lavado</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-          <div className="flex items-center mb-3">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+          <div className="flex items-center mb-2">
             <WashingMachine className="w-4 h-4 text-teal-600 mr-2 opacity-70" />
             <label htmlFor="loadsPerWeek" className="block text-sm font-medium text-gray-700">
               Cargas por Semana
@@ -47,52 +47,30 @@ const LaundryStatsForm: React.FC<LaundryStatsFormProps> = ({ onStatsUpdate }) =>
             value={stats.loadsPerWeek}
             onChange={handleChange}
             min="1"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
+            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white text-sm"
           />
-          <p className="text-xs text-gray-500 mt-2 italic">
+          <p className="text-xs text-gray-500 mt-1 italic">
             ¿Cuántas veces lavas ropa a la semana?
           </p>
         </div>
 
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-          <div className="flex items-center mb-3">
-            <Clock className="w-4 h-4 text-purple-600 mr-2 opacity-70" />
-            <label htmlFor="timePerLoad" className="block text-sm font-medium text-gray-700">
-              Minutos por Carga
-            </label>
+        <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+          <div className="text-sm font-medium text-gray-700 mb-2">
+            Tiempo por Carga
           </div>
-          <input
-            type="number"
-            id="timePerLoad"
-            name="timePerLoad"
-            value={stats.timePerLoad}
-            onChange={handleChange}
-            min="30"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
-          />
-          <p className="text-xs text-gray-500 mt-2 italic">
-            Tiempo promedio: 80 minutos
+          <div className="text-lg font-semibold text-gray-800">80 minutos</div>
+          <p className="text-xs text-gray-500 mt-1 italic">
+            Tiempo fijo establecido
           </p>
         </div>
 
-        <div className="bg-gray-50 p-4 rounded-lg border border-gray-100">
-          <div className="flex items-center mb-3">
-            <Droplets className="w-4 h-4 text-blue-600 mr-2 opacity-70" />
-            <label htmlFor="waterPerLoad" className="block text-sm font-medium text-gray-700">
-              Agua por Carga (Litros)
-            </label>
+        <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
+          <div className="text-sm font-medium text-gray-700 mb-2">
+            Agua por Carga
           </div>
-          <input
-            type="number"
-            id="waterPerLoad"
-            name="waterPerLoad"
-            value={stats.waterPerLoad}
-            onChange={handleChange}
-            min="20"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
-          />
-          <p className="text-xs text-gray-500 mt-2 italic">
-            Consumo promedio: 60 litros
+          <div className="text-lg font-semibold text-gray-800">95 litros</div>
+          <p className="text-xs text-gray-500 mt-1 italic">
+            Consumo promedio establecido
           </p>
         </div>
       </div>

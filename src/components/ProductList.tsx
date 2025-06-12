@@ -1,5 +1,5 @@
 import React from 'react';
-import { Product, productDurations } from '../types';
+import { Product, productDurations, getDurationInWeeks } from '../types';
 import { Trash2, Package, Tag, Clock, DollarSign, ShoppingBag } from 'lucide-react';
 
 interface ProductListProps {
@@ -45,7 +45,16 @@ const ProductList: React.FC<ProductListProps> = ({ products, onRemoveProduct }) 
   };
 
   const calculateMonthlyExpense = (product: Product) => {
-    return ((product.price / product.quantity) * product.usageFrequency).toFixed(2);
+    if (product.duration) {
+      // Calculate based on duration
+      const durationInWeeks = getDurationInWeeks(product.duration);
+      const replacementsPerYear = 52 / durationInWeeks;
+      const yearlyExpense = product.price * replacementsPerYear;
+      return (yearlyExpense / 12).toFixed(2);
+    } else {
+      // Fallback to old method if no duration
+      return ((product.price / (product.quantity || 1)) * (product.usageFrequency || 1)).toFixed(2);
+    }
   };
 
   if (products.length === 0) {

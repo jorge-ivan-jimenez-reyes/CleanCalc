@@ -13,8 +13,8 @@ function App() {
   const [products, setProducts] = useState<Product[]>([]);
   const [laundryStats, setLaundryStats] = useState<LaundryStats>({
     loadsPerWeek: 3,
-    timePerLoad: 80, // 80 minutos por defecto (requisito)
-    waterPerLoad: 60 // 60 litros por defecto (requisito)
+    timePerLoad: 80, // Fijo en 80 minutos
+    waterPerLoad: 95 // Fijo en 95 litros según requisitos
   });
   
   // Cargar productos guardados al iniciar

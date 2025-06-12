@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Product, productDurations } from '../types';
-import { PlusCircle, Search, Package, DollarSign, Timer, Repeat, Filter, AlertCircle } from 'lucide-react';
+import { PlusCircle, Search, Package, DollarSign, Timer, Filter, AlertCircle } from 'lucide-react';
 import { commonProducts, ProductDatabase } from '../data/products';
 import { loadAllExternalProducts, loadLocalCSVFiles } from '../utils/csvLoader';
 
@@ -16,6 +16,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
   const [externalProducts, setExternalProducts] = useState<ProductDatabase[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isProductSelected, setIsProductSelected] = useState(false);
   const [product, setProduct] = useState<Omit<Product, 'id'>>({
     name: '',
     price: 0,
@@ -81,6 +82,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
         duration: '1month',
       });
       setShowProductList(false);
+      setIsProductSelected(false);
+      setSearchTerm('');
     }
   };
   
@@ -97,7 +100,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
   const handleProductSelect = (selectedProduct: ProductDatabase) => {
     setProduct(prev => ({
       ...prev,
-      name: `${selectedProduct.brand} ${selectedProduct.name}`,
+      name: `${selectedProduct.brand} ${selectedProduct.name} - ${selectedProduct.type} ${selectedProduct.size}${selectedProduct.unit}`,
       price: selectedProduct.price,
       category: selectedProduct.category,
       brand: selectedProduct.brand,
@@ -106,6 +109,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
       unit: selectedProduct.unit,
     }));
     setShowProductList(false);
+    setIsProductSelected(true);
+    setSearchTerm(`${selectedProduct.brand} ${selectedProduct.name}`);
   };
 
   // Productos a mostrar: externos o predefinidos
@@ -130,7 +135,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
       const [brand, name] = key.split('-');
       
       // Filtrar por término de búsqueda
-      const matchesSearch = `${brand} ${name}`.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesSearch = searchTerm.length === 0 || 
+        `${brand} ${name}`.toLowerCase().includes(searchTerm.toLowerCase());
       
       // Filtrar por categoría
       const matchesCategory = selectedCategory === 'all' || 
@@ -320,12 +326,18 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
               name="price"
               value={product.price || ''}
               onChange={handleChange}
-              className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              disabled={isProductSelected}
+              className={`w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                isProductSelected ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'
+              }`}
               min="0.01"
               step="0.01"
               placeholder="0.00"
               required
             />
+            {isProductSelected && (
+              <p className="text-xs text-gray-500 mt-1">Precio fijo del producto seleccionado</p>
+            )}
           </div>
           <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
             <div className="flex items-center mb-2">
@@ -348,45 +360,6 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
                 </option>
               ))}
             </select>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
-            <div className="flex items-center mb-2">
-              <Package className="w-3.5 h-3.5 text-gray-500 mr-1.5" />
-              <label htmlFor="quantity" className="block text-xs font-medium text-gray-700">
-                Usos por Envase
-              </label>
-            </div>
-            <input
-              type="number"
-              id="quantity"
-              name="quantity"
-              value={product.quantity || 1}
-              onChange={handleChange}
-              className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-              min="1"
-              required
-            />
-          </div>
-          <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
-            <div className="flex items-center mb-2">
-              <Repeat className="w-3.5 h-3.5 text-gray-500 mr-1.5" />
-              <label htmlFor="usageFrequency" className="block text-xs font-medium text-gray-700">
-                Frecuencia de Uso (veces por mes)
-              </label>
-            </div>
-            <input
-              type="number"
-              id="usageFrequency"
-              name="usageFrequency"
-              value={product.usageFrequency || 1}
-              onChange={handleChange}
-              className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-              min="1"
-              required
-            />
           </div>
         </div>
         

@@ -323,5 +323,200 @@ export const commonProducts: ProductDatabase[] = [
     unit: "L",
     price: 355.00,
     category: "detergent"
+  },
+
+  // SUAVIZANTES
+  {
+    brand: "SUAVITEL",
+    name: "Suavizante Campo Fresco",
+    type: "Líquido",
+    size: 0.85,
+    unit: "L",
+    price: 35.50,
+    category: "softener"
+  },
+  {
+    brand: "SUAVITEL",
+    name: "Suavizante Campo Fresco",
+    type: "Líquido",
+    size: 1.75,
+    unit: "L",
+    price: 68.90,
+    category: "softener"
+  },
+  {
+    brand: "SUAVITEL",
+    name: "Suavizante Campo Fresco",
+    type: "Líquido",
+    size: 3.1,
+    unit: "L",
+    price: 118.00,
+    category: "softener"
+  },
+  {
+    brand: "SUAVITEL",
+    name: "Suavizante Lavanda",
+    type: "Líquido",
+    size: 0.85,
+    unit: "L",
+    price: 35.50,
+    category: "softener"
+  },
+  {
+    brand: "SUAVITEL",
+    name: "Suavizante Lavanda",
+    type: "Líquido",
+    size: 1.75,
+    unit: "L",
+    price: 68.90,
+    category: "softener"
+  },
+  {
+    brand: "DOWNY",
+    name: "Suavizante Aroma Floral",
+    type: "Líquido",
+    size: 0.8,
+    unit: "L",
+    price: 42.50,
+    category: "softener"
+  },
+  {
+    brand: "DOWNY",
+    name: "Suavizante Aroma Floral",
+    type: "Líquido",
+    size: 1.8,
+    unit: "L",
+    price: 89.00,
+    category: "softener"
+  },
+  {
+    brand: "DOWNY",
+    name: "Suavizante Libre Enjuague",
+    type: "Líquido",
+    size: 0.8,
+    unit: "L",
+    price: 45.00,
+    category: "softener"
+  },
+
+  // DESINFECTANTES
+  {
+    brand: "LYSOL",
+    name: "Desinfectante Multiusos",
+    type: "Líquido",
+    size: 0.5,
+    unit: "L",
+    price: 28.90,
+    category: "disinfectant"
+  },
+  {
+    brand: "LYSOL",
+    name: "Desinfectante Multiusos",
+    type: "Líquido",
+    size: 1,
+    unit: "L",
+    price: 52.50,
+    category: "disinfectant"
+  },
+  {
+    brand: "FABULOSO",
+    name: "Desinfectante Lavanda",
+    type: "Líquido",
+    size: 0.9,
+    unit: "L",
+    price: 38.90,
+    category: "disinfectant"
+  },
+  {
+    brand: "FABULOSO",
+    name: "Desinfectante Lavanda",
+    type: "Líquido",
+    size: 1.8,
+    unit: "L",
+    price: 72.50,
+    category: "disinfectant"
+  },
+  {
+    brand: "FABULOSO",
+    name: "Desinfectante Océano",
+    type: "Líquido",
+    size: 0.9,
+    unit: "L",
+    price: 38.90,
+    category: "disinfectant"
+  },
+  {
+    brand: "PINOL",
+    name: "Desinfectante Original",
+    type: "Líquido",
+    size: 0.9,
+    unit: "L",
+    price: 32.50,
+    category: "disinfectant"
+  },
+  {
+    brand: "PINOL",
+    name: "Desinfectante Original",
+    type: "Líquido",
+    size: 1.8,
+    unit: "L",
+    price: 58.90,
+    category: "disinfectant"
+  },
+
+  // POTENCIADORES DE AROMA
+  {
+    brand: "DOWNY",
+    name: "Unstopables Frescura",
+    type: "Perlas",
+    size: 0.375,
+    unit: "kg",
+    price: 89.50,
+    category: "enhancer"
+  },
+  {
+    brand: "DOWNY",
+    name: "Unstopables Frescura",
+    type: "Perlas",
+    size: 0.750,
+    unit: "kg",
+    price: 158.90,
+    category: "enhancer"
+  },
+  {
+    brand: "DOWNY",
+    name: "Unstopables Lavanda",
+    type: "Perlas",
+    size: 0.375,
+    unit: "kg",
+    price: 89.50,
+    category: "enhancer"
+  },
+  {
+    brand: "ARIEL",
+    name: "Power Pods",
+    type: "Cápsulas",
+    size: 12,
+    unit: "piezas",
+    price: 45.90,
+    category: "enhancer"
+  },
+  {
+    brand: "ARIEL",
+    name: "Power Pods",
+    type: "Cápsulas",
+    size: 24,
+    unit: "piezas",
+    price: 89.50,
+    category: "enhancer"
+  },
+  {
+    brand: "GAIN",
+    name: "Fireworks Aroma Boost",
+    type: "Perlas",
+    size: 0.375,
+    unit: "kg",
+    price: 92.50,
+    category: "enhancer"
   }
 ];
