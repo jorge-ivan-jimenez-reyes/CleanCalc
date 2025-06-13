@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Product, productDurations } from '../types';
 import { PlusCircle, Search, Package, DollarSign, Timer, Filter, AlertCircle } from 'lucide-react';
 import { commonProducts, ProductDatabase } from '../data/products';
@@ -26,6 +26,8 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
     duration: '1month',
   });
   
+  const productListRef = useRef<HTMLDivElement>(null);
+
   // Cargar productos desde archivos CSV externos
   useEffect(() => {
     const loadProducts = async () => {
@@ -65,6 +67,20 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
     
     loadProducts();
   }, []);
+  
+  // Cerrar el buscador al hacer click fuera
+  useEffect(() => {
+    if (!showProductList) return;
+    const handleClickOutside = (event: MouseEvent) => {
+      if (productListRef.current && !productListRef.current.contains(event.target as Node)) {
+        setShowProductList(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showProductList]);
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -196,7 +212,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
         </div>
         
         {showProductList && (
-          <div className="absolute z-10 mt-1 w-full max-w-2xl bg-white rounded-lg shadow-xl border border-gray-200">
+          <div ref={productListRef} className="absolute z-10 mt-1 w-full max-w-2xl bg-white rounded-lg shadow-xl border border-gray-200">
             <div className="flex border-b border-gray-100 p-2 bg-gray-50">
               <div className="flex items-center">
                 <Filter className="h-3.5 w-3.5 text-gray-500 mr-1.5" />
@@ -232,7 +248,7 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
                 <div key={key} className="border-b border-gray-100 py-2 px-3 hover:bg-gray-50">
                   <div className="font-medium text-gray-800 flex items-center text-sm">
                     <span className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800 text-xxs mr-2">{products[0].brand}</span>
-                    {products[0].name}
+                    <span>{products[0].name}</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 mt-1.5">
                     {products.map((p, idx) => (
@@ -270,109 +286,123 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
         )}
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
-            <div className="flex items-center mb-2">
-              <Package className="w-3.5 h-3.5 text-gray-500 mr-1.5" />
-              <label htmlFor="name" className="block text-xs font-medium text-gray-700">
-                Nombre del Producto
-              </label>
-            </div>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              value={product.name}
-              onChange={handleChange}
-              className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-              placeholder="ej., MAS Original"
-              required
-            />
-          </div>
-          <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
-            <div className="flex items-center mb-2">
-              <Search className="w-3.5 h-3.5 text-gray-500 mr-1.5" />
-              <label htmlFor="category" className="block text-xs font-medium text-gray-700">
-                Categoría
-              </label>
-            </div>
-            <select
-              id="category"
-              name="category"
-              value={product.category}
-              onChange={handleChange}
-              className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+      {/* Mostrar el formulario solo si ya se seleccionó un producto */}
+      {isProductSelected && (
+        <>
+          <div className="flex items-center mb-2">
+            <span className="text-sm font-medium text-gray-700 mr-2">Producto seleccionado:</span>
+            <span className="px-2 py-1 rounded bg-blue-100 text-blue-800 text-xs font-semibold mr-2">{product.name}</span>
+            <button
+              type="button"
+              onClick={() => { setIsProductSelected(false); setShowProductList(true); }}
+              className="ml-2 px-2 py-1 text-xs bg-gray-200 hover:bg-blue-200 text-gray-700 rounded transition-colors"
             >
-              <option value="detergent">Detergente</option>
-              <option value="softener">Suavizante</option>
-              <option value="disinfectant">Desinfectante</option>
-              <option value="enhancer">Potenciador de Aroma</option>
-            </select>
+              Cambiar producto
+            </button>
           </div>
-        </div>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
-            <div className="flex items-center mb-2">
-              <DollarSign className="w-3.5 h-3.5 text-gray-500 mr-1.5" />
-              <label htmlFor="price" className="block text-xs font-medium text-gray-700">
-                Precio ($)
-              </label>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
+                <div className="flex items-center mb-2">
+                  <Package className="w-3.5 h-3.5 text-gray-500 mr-1.5" />
+                  <label htmlFor="name" className="block text-xs font-medium text-gray-700">
+                    Nombre del Producto
+                  </label>
+                </div>
+                <input
+                  type="text"
+                  id="name"
+                  name="name"
+                  value={product.name}
+                  onChange={handleChange}
+                  className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  placeholder="ej., MAS Original"
+                  required
+                />
+              </div>
+              <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
+                <div className="flex items-center mb-2">
+                  <Search className="w-3.5 h-3.5 text-gray-500 mr-1.5" />
+                  <label htmlFor="category" className="block text-xs font-medium text-gray-700">
+                    Categoría
+                  </label>
+                </div>
+                <select
+                  id="category"
+                  name="category"
+                  value={product.category}
+                  onChange={handleChange}
+                  className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                >
+                  <option value="detergent">Detergente</option>
+                  <option value="softener">Suavizante</option>
+                  <option value="disinfectant">Desinfectante</option>
+                  <option value="enhancer">Potenciador de Aroma</option>
+                </select>
+              </div>
             </div>
-            <input
-              type="number"
-              id="price"
-              name="price"
-              value={product.price || ''}
-              onChange={handleChange}
-              disabled={isProductSelected}
-              className={`w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                isProductSelected ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'
-              }`}
-              min="0.01"
-              step="0.01"
-              placeholder="0.00"
-              required
-            />
-            {isProductSelected && (
-              <p className="text-xs text-gray-500 mt-1">Precio fijo del producto seleccionado</p>
-            )}
-          </div>
-          <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
-            <div className="flex items-center mb-2">
-              <Timer className="w-3.5 h-3.5 text-gray-500 mr-1.5" />
-              <label htmlFor="duration" className="block text-xs font-medium text-gray-700">
-                ¿Cuánto te dura el producto?
-              </label>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
+                <div className="flex items-center mb-2">
+                  <DollarSign className="w-3.5 h-3.5 text-gray-500 mr-1.5" />
+                  <label htmlFor="price" className="block text-xs font-medium text-gray-700">
+                    Precio ($)
+                  </label>
+                </div>
+                <input
+                  type="number"
+                  id="price"
+                  name="price"
+                  value={product.price || ''}
+                  onChange={handleChange}
+                  disabled={isProductSelected}
+                  className={`w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                    isProductSelected ? 'bg-gray-100 cursor-not-allowed' : 'bg-white'
+                  }`}
+                  min="0.01"
+                  step="0.01"
+                  placeholder="0.00"
+                  required
+                />
+                {isProductSelected && (
+                  <p className="text-xs text-gray-500 mt-1">Precio fijo del producto seleccionado</p>
+                )}
+              </div>
+              <div className="bg-gray-50 p-3 rounded-md border border-gray-100">
+                <div className="flex items-center mb-2">
+                  <Timer className="w-3.5 h-3.5 text-gray-500 mr-1.5" />
+                  <label htmlFor="duration" className="block text-xs font-medium text-gray-700">
+                    ¿Cuánto te dura el producto?
+                  </label>
+                </div>
+                <select
+                  id="duration"
+                  name="duration"
+                  value={product.duration}
+                  onChange={handleChange}
+                  className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+                  required
+                >
+                  {productDurations.map((duration) => (
+                    <option key={duration.value} value={duration.value}>
+                      {duration.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
-            <select
-              id="duration"
-              name="duration"
-              value={product.duration}
-              onChange={handleChange}
-              className="w-full px-2.5 py-1.5 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-              required
-            >
-              {productDurations.map((duration) => (
-                <option key={duration.value} value={duration.value}>
-                  {duration.label}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        
-        <div className="flex justify-end">
-          <button
-            type="submit"
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors flex items-center text-sm"
-          >
-            <PlusCircle className="w-4 h-4 mr-2" />
-            Agregar Producto
-          </button>
-        </div>
-      </form>
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition-colors flex items-center text-sm"
+              >
+                <PlusCircle className="w-4 h-4 mr-2" />
+                Agregar Producto
+              </button>
+            </div>
+          </form>
+        </>
+      )}
     </div>
   );
 };
