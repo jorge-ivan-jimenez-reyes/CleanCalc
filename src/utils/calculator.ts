@@ -4,7 +4,6 @@ const WEEKS_PER_YEAR = 52;
 const MONTHS_PER_YEAR = 12;
 
 // Constantes para GECO
-const GECO_INITIAL_PRICE = 2000; // Precio inicial de GECO
 const GECO_PRICE_PER_LOAD = 20;  // Costo por carga con GECO
 const GECO_TIME_SAVED_PER_LOAD = 30; // Minutos ahorrados por carga
 const GECO_WATER_REDUCTION_FACTOR = 0.5; // Factor de reducción de agua (50%)
@@ -83,8 +82,8 @@ export const calculateExpenseSummary = (products: Product[], laundryStats?: Laun
     summary.yearlyTimeSpent = (yearlyLoads * laundryStats.timePerLoad) / 60; // Convert to hours
     
     // Cálculos para GECO
-    // cuanto gastas en productos al año ($2000+ $20x cargas de lavado a la semana x52 semanas)
-    summary.gecoYearlyExpense = GECO_INITIAL_PRICE + (GECO_PRICE_PER_LOAD * laundryStats.loadsPerWeek * WEEKS_PER_YEAR);
+    // cuanto gastas en productos al año ($20 x cargas de lavado a la semana x 52 semanas)
+    summary.gecoYearlyExpense = GECO_PRICE_PER_LOAD * laundryStats.loadsPerWeek * WEEKS_PER_YEAR;
     
     // cuanto tiempo utilizas en lavar al año (80 min - 30 min x cargas de lavado a la semana x 52 semanas)
     const reducedTimePerLoad = Math.max(laundryStats.timePerLoad - GECO_TIME_SAVED_PER_LOAD, 0);
