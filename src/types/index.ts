@@ -67,3 +67,19 @@ export const getDurationInWeeks = (duration: string): number => {
     default: return 4.33; // default to 1 month
   }
 };
+
+// Nuevos tipos para el sistema de pasos
+export type FlowStep = 'welcome' | 'laundry-habits' | 'product-selection' | 'product-config' | 'results-reveal' | 'comparison';
+
+export interface FlowState {
+  currentStep: FlowStep;
+  completedSteps: FlowStep[];
+  canProceed: boolean;
+  selectedProducts: Product[];
+  isFlowComplete: boolean;
+}
+
+export interface StepValidation {
+  isValid: boolean;
+  message?: string;
+}
