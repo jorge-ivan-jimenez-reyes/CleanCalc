@@ -1,15 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ExpenseSummary } from '../types';
+import { ExpenseSummary, Product, LaundryStats } from '../types';
 import { formatCurrency, formatNumber } from '../utils/calculator';
-import { DollarSign, Droplet, Clock, TrendingDown, Award, Sparkles, ArrowRight, CheckCircle } from 'lucide-react';
+import { exportToExcel, exportSummaryToExcel } from '../utils/excelExport';
+import { DollarSign, Droplet, Clock, TrendingDown, Award, Sparkles, ArrowRight, CheckCircle, Download, FileSpreadsheet } from 'lucide-react';
 
 interface AnimatedComparisonProps {
   expenseSummary: ExpenseSummary;
+  selectedProducts?: Product[];
+  laundryStats?: LaundryStats;
   onRestart: () => void;
 }
 
-const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary, onRestart }) => {
+const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary, selectedProducts = [], laundryStats, onRestart }) => {
   const [activeComparison, setActiveComparison] = useState<'money' | 'water' | 'time' | 'summary'>('money');
   const [showSummary, setShowSummary] = useState(false);
 
@@ -17,6 +20,34 @@ const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary,
     const timer = setTimeout(() => setShowSummary(true), 2000);
     return () => clearTimeout(timer);
   }, []);
+
+  const handleExportComplete = async () => {
+    if (selectedProducts.length > 0 && laundryStats) {
+      try {
+        const fileName = await exportToExcel({
+          expenseSummary,
+          selectedProducts,
+          laundryStats
+        });
+        alert(`¡Excel exportado exitosamente! Archivo: ${fileName}`);
+      } catch (error) {
+        alert('Error al exportar el archivo Excel');
+        console.error(error);
+      }
+    } else {
+      alert('No hay datos suficientes para exportar');
+    }
+  };
+
+  const handleExportSummary = async () => {
+    try {
+      const fileName = await exportSummaryToExcel(expenseSummary);
+      alert(`¡Resumen exportado exitosamente! Archivo: ${fileName}`);
+    } catch (error) {
+      alert('Error al exportar el resumen');
+      console.error(error);
+    }
+  };
 
   const comparisons = [
     {
@@ -28,7 +59,7 @@ const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary,
       savings: expenseSummary.savedMoney,
       color: 'green',
       unit: '$',
-      description: 'Gasto anual en productos de lavandería'
+      description: 'Productos tradicionales (múltiples) vs GECO (todo incluido)'
     },
     {
       id: 'water' as const,
@@ -92,7 +123,10 @@ const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary,
           {/* Productos Tradicionales */}
           <div className="bg-red-50 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
-              <span className="font-medium text-gray-700">Productos Tradicionales</span>
+              <div>
+                <span className="font-medium text-gray-700">Productos Tradicionales</span>
+                <p className="text-xs text-gray-500">detergente + suavizante + extras</p>
+              </div>
               <span className="font-bold text-red-600">
                 {comparison.traditional.toLocaleString()} {comparison.unit}
               </span>
@@ -113,8 +147,13 @@ const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary,
           <div className="bg-teal-50 rounded-lg p-4">
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center">
-                <span className="font-medium text-gray-700 mr-2">GECO</span>
-                <Sparkles className="w-4 h-4 text-teal-500" />
+                <div>
+                  <div className="flex items-center">
+                    <span className="font-medium text-gray-700 mr-2">GECO</span>
+                    <Sparkles className="w-4 h-4 text-teal-500" />
+                  </div>
+                  <p className="text-xs text-teal-600 font-medium">TODO EN UNO - 2 tabletas/carga</p>
+                </div>
               </div>
               <span className="font-bold text-teal-600">
                 {comparison.geco.toLocaleString()} {comparison.unit}
@@ -277,12 +316,12 @@ const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary,
                   </h3>
                   <ul className="space-y-3">
                                          {[
-                       'Sistema todo-en-uno (detergente + aroma + desinfección)',
-                       'Solo 2 pastillas por carga',
-                       'Fórmula eco-friendly',
-                       'Reduce tiempo de lavado',
-                       'Menor consumo de agua',
-                       'Más económico a largo plazo'
+                       'TODO EN UNO: detergente + suavizante + desinfectante + aroma',
+                       'Solo 2 tabletas por carga (no más productos adicionales)',
+                       'Fórmula eco-friendly concentrada',
+                       'Reduce tiempo de lavado en 30 minutos',
+                       'Menor consumo de agua (50% menos)',
+                       'Más económico vs comprar múltiples productos'
                      ].map((benefit, index) => (
                       <motion.li
                         key={index}
@@ -344,6 +383,26 @@ const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary,
                   <p className="text-lg mb-6">
                     Únete a la revolución del lavado inteligente
                   </p>
+                  {/* Botones de exportación */}
+                  <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
+                    <button
+                      onClick={handleExportSummary}
+                      className="bg-green-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Exportar Resumen
+                    </button>
+                    {selectedProducts.length > 0 && laundryStats && (
+                      <button
+                        onClick={handleExportComplete}
+                        className="bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
+                      >
+                        <FileSpreadsheet className="w-4 h-4 mr-2" />
+                        Exportar Análisis Completo
+                      </button>
+                    )}
+                  </div>
+
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
                       onClick={onRestart}

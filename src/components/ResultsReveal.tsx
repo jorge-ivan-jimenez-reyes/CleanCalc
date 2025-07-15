@@ -245,15 +245,18 @@ const ResultsReveal: React.FC<ResultsRevealProps> = ({ expenseSummary, onContinu
                                          <h3 className="text-3xl font-bold text-teal-400 mb-4">
                        Conoce GECO
                      </h3>
-                     <p className="text-lg text-gray-300 mb-6">
-                       Sistema completo: detergente + aroma + desinfección
+                     <p className="text-lg text-gray-300 mb-4">
+                       <strong className="text-teal-400">TODO EN UNO:</strong> detergente + suavizante + desinfectante + aroma
+                     </p>
+                     <p className="text-sm text-gray-400 mb-6">
+                       ¡No necesitas comprar productos adicionales!
                      </p>
                     
                                          <div className="grid grid-cols-3 gap-4 text-sm">
                        <div className="text-center">
                          <Zap className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
-                         <p className="text-yellow-400">Sistema completo</p>
-                         <p className="text-xs text-gray-400">2 pastillas</p>
+                         <p className="text-yellow-400">Todo incluido</p>
+                         <p className="text-xs text-gray-400">2 tabletas/carga</p>
                        </div>
                        <div className="text-center">
                          <Droplet className="w-6 h-6 text-blue-400 mx-auto mb-2" />
@@ -262,8 +265,8 @@ const ResultsReveal: React.FC<ResultsRevealProps> = ({ expenseSummary, onContinu
                        </div>
                        <div className="text-center">
                          <DollarSign className="w-6 h-6 text-green-400 mx-auto mb-2" />
-                         <p className="text-green-400">Más económico</p>
-                         <p className="text-xs text-gray-400">$10 por pastilla</p>
+                         <p className="text-green-400">Solo $10/carga</p>
+                         <p className="text-xs text-gray-400">vs múltiples productos</p>
                        </div>
                      </div>
                   </motion.div>

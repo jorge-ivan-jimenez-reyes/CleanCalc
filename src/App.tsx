@@ -252,6 +252,8 @@ function App() {
         return (
           <AnimatedComparison
             expenseSummary={expenseSummary}
+            selectedProducts={products}
+            laundryStats={laundryStats}
             onRestart={handleRestartFlow}
           />
         );

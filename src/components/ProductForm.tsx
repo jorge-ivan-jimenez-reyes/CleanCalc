@@ -113,12 +113,84 @@ const ProductForm: React.FC<ProductFormProps> = ({ onAddProduct }) => {
     }));
   };
 
+  const getRealisticDuration = (productData: ProductDatabase): string => {
+    const { category, size, unit } = productData;
+    
+    // Calcular duración basada en tamaño y categoría
+    if (category === 'detergent') {
+      // Detergentes: ~50ml por carga, 3 cargas/semana
+      const mlPerWeek = 50 * 3; // 150ml por semana
+      const totalMl = unit === 'L' ? size * 1000 : size;
+      const weeks = totalMl / mlPerWeek;
+      
+      if (weeks <= 2) return '2weeks';
+      if (weeks <= 6) return '1month';
+      if (weeks <= 10) return '2months';
+      if (weeks <= 18) return '3months';
+      if (weeks <= 30) return '6months';
+      return '1year';
+    }
+    
+    if (category === 'softener') {
+      // Suavizantes: ~30ml por carga
+      const mlPerWeek = 30 * 3; // 90ml por semana
+      const totalMl = unit === 'L' ? size * 1000 : size;
+      const weeks = totalMl / mlPerWeek;
+      
+      if (weeks <= 3) return '2weeks';
+      if (weeks <= 8) return '1month';
+      if (weeks <= 12) return '2months';
+      if (weeks <= 20) return '3months';
+      if (weeks <= 35) return '6months';
+      return '1year';
+    }
+    
+    if (category === 'disinfectant') {
+      // Desinfectantes: ~20ml por carga
+      const mlPerWeek = 20 * 3; // 60ml por semana
+      const totalMl = unit === 'L' ? size * 1000 : size;
+      const weeks = totalMl / mlPerWeek;
+      
+      if (weeks <= 4) return '1month';
+      if (weeks <= 10) return '2months';
+      if (weeks <= 18) return '3months';
+      if (weeks <= 30) return '6months';
+      return '1year';
+    }
+    
+    if (category === 'enhancer') {
+      // Potenciadores: cantidad variable según tipo
+      if (unit === 'kg') {
+        // Perlas: ~10g por carga
+        const gPerWeek = 10 * 3; // 30g por semana
+        const totalG = size * 1000;
+        const weeks = totalG / gPerWeek;
+        
+        if (weeks <= 6) return '1month';
+        if (weeks <= 12) return '2months';
+        if (weeks <= 20) return '3months';
+        return '6months';
+      } else if (unit === 'piezas') {
+        // Cápsulas: 1 por carga
+        const weeks = size / 3; // 3 cargas por semana
+        
+        if (weeks <= 2) return '2weeks';
+        if (weeks <= 6) return '1month';
+        if (weeks <= 10) return '2months';
+        return '3months';
+      }
+    }
+    
+    return '1month'; // fallback
+  };
+
   const handleProductSelect = (selectedProduct: ProductDatabase) => {
     setProduct(prev => ({
       ...prev,
       name: `${selectedProduct.brand} ${selectedProduct.name} - ${selectedProduct.type} ${selectedProduct.size}${selectedProduct.unit}`,
       price: selectedProduct.price,
       category: selectedProduct.category,
+      duration: getRealisticDuration(selectedProduct),
       brand: selectedProduct.brand,
       type: selectedProduct.type,
       size: selectedProduct.size,
