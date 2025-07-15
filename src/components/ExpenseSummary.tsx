@@ -168,7 +168,7 @@ const ExpenseSummary: React.FC<ExpenseSummaryProps> = ({ summary }) => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xxs">
               <div className="flex items-center bg-white p-1.5 rounded-md border border-gray-100">
                 <DollarSign className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
-                <p>Costo por pastilla: {formatCurrency(5)}</p>
+                <p>Costo por carga: {formatCurrency(20)} (2 pastillas)</p>
               </div>
               <div className="flex items-center bg-white p-1.5 rounded-md border border-gray-100">
                 <Clock className="h-3.5 w-3.5 mr-1.5 text-gray-500" />

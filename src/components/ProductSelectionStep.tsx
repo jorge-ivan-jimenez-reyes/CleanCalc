@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Product } from '../types';
 import { commonProducts, ProductDatabase } from '../data/products';
 import { loadAllExternalProducts } from '../utils/csvLoader';
-import { Package, Plus, Check, Trash2, AlertCircle } from 'lucide-react';
+import { Package, Plus, Check, Trash2, AlertCircle, ChevronDown, ChevronUp } from 'lucide-react';
 
 interface ProductSelectionStepProps {
   selectedProducts: Product[];
@@ -19,6 +19,7 @@ const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
   const [availableProducts, setAvailableProducts] = useState<ProductDatabase[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   
   const MINIMUM_PRODUCTS = 2;
   const isValid = selectedProducts.length >= MINIMUM_PRODUCTS;
@@ -68,6 +69,16 @@ const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
 
   const handleProductRemove = (productId: string) => {
     onProductsChange(selectedProducts.filter(p => p.id !== productId));
+  };
+
+  const toggleGroupExpansion = (groupKey: string) => {
+    const newExpanded = new Set(expandedGroups);
+    if (newExpanded.has(groupKey)) {
+      newExpanded.delete(groupKey);
+    } else {
+      newExpanded.add(groupKey);
+    }
+    setExpandedGroups(newExpanded);
   };
 
   const getCategoryIcon = (category: string) => {
@@ -174,7 +185,8 @@ const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
                     </span>
                     <div>
                       <p className="font-medium text-gray-800 text-sm">{product.brand}</p>
-                      <p className="text-xs text-gray-600">{product.type}</p>
+                      <p className="text-xs text-gray-600">{product.type} - {product.size}{product.unit}</p>
+                      <p className="text-xs font-semibold text-green-600">${product.price}</p>
                     </div>
                   </div>
                   <button
@@ -237,48 +249,99 @@ const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
             <p className="text-gray-600">Cargando productos...</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+          <div className="space-y-4 max-h-96 overflow-y-auto">
             {Object.entries(groupedProducts).map(([key, products]) => {
               const mainProduct = products[0];
-              const isSelected = selectedProducts.some(p => 
-                p.name.includes(mainProduct.brand) && p.name.includes(mainProduct.name)
-              );
-
+              const hasVariants = products.length > 1;
+              const isExpanded = expandedGroups.has(key);
+              
               return (
                 <motion.div
                   key={key}
-                  className={`border rounded-lg p-4 cursor-pointer transition-all ${
-                    isSelected 
-                      ? 'border-green-500 bg-green-50' 
-                      : 'border-gray-200 hover:border-teal-300 hover:shadow-md'
-                  }`}
-                  onClick={() => !isSelected && handleProductSelect(mainProduct)}
-                  whileHover={{ scale: isSelected ? 1 : 1.02 }}
-                  whileTap={{ scale: 0.98 }}
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.3 }}
+                  className="border border-gray-200 rounded-lg overflow-hidden"
                 >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getCategoryColor(mainProduct.category)} flex items-center justify-center text-white text-lg`}>
-                      {getCategoryIcon(mainProduct.category)}
-                    </div>
-                    {isSelected && (
-                      <div className="bg-green-500 text-white rounded-full p-1">
-                        <Check className="w-3 h-3" />
+                  {/* Producto principal */}
+                  <div className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center flex-1">
+                        <div className={`w-10 h-10 rounded-full bg-gradient-to-br ${getCategoryColor(mainProduct.category)} flex items-center justify-center text-white text-lg mr-4`}>
+                          {getCategoryIcon(mainProduct.category)}
+                        </div>
+                        <div>
+                          <h4 className="font-semibold text-gray-800">{mainProduct.brand}</h4>
+                          <p className="text-gray-600 text-sm">{mainProduct.name}</p>
+                        </div>
                       </div>
-                    )}
+                      
+                      {hasVariants && (
+                        <button
+                          onClick={() => toggleGroupExpansion(key)}
+                          className="flex items-center text-teal-600 hover:text-teal-700 text-sm font-medium"
+                        >
+                          <span className="mr-1">{products.length} variantes</span>
+                          {isExpanded ? (
+                            <ChevronUp className="w-4 h-4" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4" />
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  
-                  <h4 className="font-semibold text-gray-800 text-sm mb-1">{mainProduct.brand}</h4>
-                  <p className="text-gray-600 text-xs mb-2">{mainProduct.name}</p>
-                  <p className="text-teal-600 font-bold text-sm">${mainProduct.price}</p>
-                  
-                  {products.length > 1 && (
-                    <p className="text-xs text-gray-500 mt-2">
-                      +{products.length - 1} variantes
-                    </p>
-                  )}
+
+                  {/* Variantes expandidas */}
+                  <AnimatePresence>
+                    {(isExpanded || !hasVariants) && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="border-t border-gray-100 bg-gray-50"
+                      >
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 p-4">
+                          {products.map((variant, index) => {
+                            const isSelected = selectedProducts.some(p => 
+                              p.name === `${variant.brand} ${variant.name} - ${variant.type} ${variant.size}${variant.unit}`
+                            );
+
+                            return (
+                              <motion.div
+                                key={index}
+                                className={`border rounded-lg p-3 cursor-pointer transition-all ${
+                                  isSelected 
+                                    ? 'border-green-500 bg-green-50' 
+                                    : 'border-gray-200 hover:border-teal-300 hover:shadow-sm bg-white'
+                                }`}
+                                onClick={() => !isSelected && handleProductSelect(variant)}
+                                whileHover={{ scale: isSelected ? 1 : 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.2, delay: index * 0.05 }}
+                              >
+                                <div className="flex items-center justify-between mb-2">
+                                  <div>
+                                    <p className="font-medium text-gray-800 text-sm">{variant.type}</p>
+                                    <p className="text-gray-600 text-xs">{variant.size}{variant.unit}</p>
+                                  </div>
+                                  {isSelected && (
+                                    <div className="bg-green-500 text-white rounded-full p-1">
+                                      <Check className="w-3 h-3" />
+                                    </div>
+                                  )}
+                                </div>
+                                <p className="text-teal-600 font-bold">${variant.price}</p>
+                              </motion.div>
+                            );
+                          })}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               );
             })}

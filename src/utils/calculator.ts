@@ -4,7 +4,7 @@ const WEEKS_PER_YEAR = 52;
 const MONTHS_PER_YEAR = 12;
 
 // Constantes para GECO
-const GECO_PRICE_PER_LOAD = 5;  // Costo por carga con GECO ($5 por pastilla)
+const GECO_PRICE_PER_LOAD = 20;  // Costo por carga con GECO (2 pastillas x $10 c/u)
 const GECO_TIME_SAVED_PER_LOAD = 30; // Minutos ahorrados por carga
 const GECO_WATER_REDUCTION_FACTOR = 0.5; // Factor de reducción de agua (50%)
 

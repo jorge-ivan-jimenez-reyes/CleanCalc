@@ -276,14 +276,14 @@ const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary,
                     Beneficios de GECO
                   </h3>
                   <ul className="space-y-3">
-                    {[
-                      'Todo en una sola pastilla',
-                      'Fórmula eco-friendly',
-                      'Reduce tiempo de lavado',
-                      'Menor consumo de agua',
-                      'Más económico a largo plazo',
-                      'Fácil de usar y almacenar'
-                    ].map((benefit, index) => (
+                                         {[
+                       'Sistema todo-en-uno (detergente + aroma + desinfección)',
+                       'Solo 2 pastillas por carga',
+                       'Fórmula eco-friendly',
+                       'Reduce tiempo de lavado',
+                       'Menor consumo de agua',
+                       'Más económico a largo plazo'
+                     ].map((benefit, index) => (
                       <motion.li
                         key={index}
                         initial={{ opacity: 0, x: -10 }}

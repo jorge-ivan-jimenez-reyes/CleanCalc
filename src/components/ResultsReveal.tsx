@@ -242,27 +242,30 @@ const ResultsReveal: React.FC<ResultsRevealProps> = ({ expenseSummary, onContinu
                       <Sparkles className="w-12 h-12 text-white" />
                     </motion.div>
                     
-                    <h3 className="text-3xl font-bold text-teal-400 mb-4">
-                      Conoce GECO
-                    </h3>
-                    <p className="text-lg text-gray-300 mb-6">
-                      La revolución en productos de lavandería
-                    </p>
+                                         <h3 className="text-3xl font-bold text-teal-400 mb-4">
+                       Conoce GECO
+                     </h3>
+                     <p className="text-lg text-gray-300 mb-6">
+                       Sistema completo: detergente + aroma + desinfección
+                     </p>
                     
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div className="text-center">
-                        <Zap className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
-                        <p className="text-yellow-400">Todo en uno</p>
-                      </div>
-                      <div className="text-center">
-                        <Droplet className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-                        <p className="text-blue-400">Eco-friendly</p>
-                      </div>
-                      <div className="text-center">
-                        <DollarSign className="w-6 h-6 text-green-400 mx-auto mb-2" />
-                        <p className="text-green-400">Más económico</p>
-                      </div>
-                    </div>
+                                         <div className="grid grid-cols-3 gap-4 text-sm">
+                       <div className="text-center">
+                         <Zap className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
+                         <p className="text-yellow-400">Sistema completo</p>
+                         <p className="text-xs text-gray-400">2 pastillas</p>
+                       </div>
+                       <div className="text-center">
+                         <Droplet className="w-6 h-6 text-blue-400 mx-auto mb-2" />
+                         <p className="text-blue-400">Eco-friendly</p>
+                         <p className="text-xs text-gray-400">50% menos agua</p>
+                       </div>
+                       <div className="text-center">
+                         <DollarSign className="w-6 h-6 text-green-400 mx-auto mb-2" />
+                         <p className="text-green-400">Más económico</p>
+                         <p className="text-xs text-gray-400">$10 por pastilla</p>
+                       </div>
+                     </div>
                   </motion.div>
                 )}
               </AnimatePresence>
