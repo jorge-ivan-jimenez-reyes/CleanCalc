@@ -104,6 +104,18 @@ const ExpenseSummary: React.FC<ExpenseSummaryProps> = ({ summary }) => {
                 </div>
               ))}
             </div>
+            
+            {summary.costPerLoad > 0 && (
+              <div className="bg-red-50 rounded-md p-2.5 border border-red-100 mt-3">
+                <h3 className="text-xs font-semibold text-red-800 mb-2">Costo por Carga</h3>
+                <div className="flex items-center bg-white p-1.5 rounded-md border border-red-100">
+                  <DollarSign className="h-3.5 w-3.5 mr-1.5 text-red-500" />
+                  <p className="text-xs text-red-700">
+                    {formatCurrency(summary.costPerLoad)} (múltiples productos)
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
           
           <div className="lg:w-1/2">
@@ -163,12 +175,12 @@ const ExpenseSummary: React.FC<ExpenseSummaryProps> = ({ summary }) => {
             </div>
           </div>
           
-          <div className="bg-gray-50 rounded-md p-2.5 border border-gray-100">
+                      <div className="bg-gray-50 rounded-md p-2.5 border border-gray-100">
             <h3 className="text-xs font-semibold text-gray-800 mb-2">Detalles del Cálculo</h3>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xxs">
               <div className="flex items-center bg-white p-1.5 rounded-md border border-gray-100">
                 <DollarSign className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
-                <p>Costo por carga: {formatCurrency(20)} (2 pastillas)</p>
+                <p>Costo por carga: {formatCurrency(summary.gecoCostPerLoad)} (2 pastillas)</p>
               </div>
               <div className="flex items-center bg-white p-1.5 rounded-md border border-gray-100">
                 <Clock className="h-3.5 w-3.5 mr-1.5 text-gray-500" />
@@ -284,6 +296,41 @@ const ExpenseSummary: React.FC<ExpenseSummaryProps> = ({ summary }) => {
               </div>
             </div>
           </div>
+          
+          {/* Comparación de Costo por Carga */}
+          {summary.costPerLoad > 0 && (
+            <div className="flex mt-3">
+              <div className="w-1/3 bg-orange-50 rounded-md p-2 border border-orange-100 flex flex-col justify-center">
+                <h3 className="text-xs font-semibold text-orange-700 flex items-center justify-between">
+                  <span>Por Carga</span>
+                  {summary.costPerLoad > summary.gecoCostPerLoad && (
+                    <span className="text-xxs font-bold bg-orange-100 text-orange-800 px-1 py-0.5 rounded-full ml-1">
+                      {summary.costPerLoad > 0 ? `${(((summary.costPerLoad - summary.gecoCostPerLoad) / summary.costPerLoad) * 100).toFixed(0)}%` : '0%'}
+                    </span>
+                  )}
+                </h3>
+                <p className="text-base font-bold text-orange-700">
+                  {formatCurrency(Math.max(0, summary.costPerLoad - summary.gecoCostPerLoad))}
+                </p>
+              </div>
+              <div className="w-2/3 ml-2">
+                <div className="bg-white rounded-md p-2 border border-gray-100 mb-1.5">
+                  <p className="text-xxs text-gray-500 mb-0.5">Tradicional:</p>
+                  <div className="flex items-center">
+                    <DollarSign className="h-3 w-3 mr-1 text-gray-600" />
+                    <span className="text-xs font-medium">{formatCurrency(summary.costPerLoad)}</span>
+                  </div>
+                </div>
+                <div className="bg-white rounded-md p-2 border border-gray-100">
+                  <p className="text-xxs text-gray-500 mb-0.5">GECO:</p>
+                  <div className="flex items-center">
+                    <DollarSign className="h-3 w-3 mr-1 text-green-600" />
+                    <span className="text-xs font-medium">{formatCurrency(summary.gecoCostPerLoad)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
           
           {/* Impacto Ambiental - Ocultado por espacio */}
         </div>

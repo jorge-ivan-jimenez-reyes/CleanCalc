@@ -18,11 +18,13 @@ export const calculateExpenseSummary = (products: Product[], laundryStats?: Laun
     yearlyExpense: 0,
     yearlyWaterUsage: 0,
     yearlyTimeSpent: 0,
+    costPerLoad: 0,
     
     // Gastos con GECO
     gecoYearlyExpense: 0,
     gecoYearlyWaterUsage: 0,
     gecoYearlyTimeSpent: 0,
+    gecoCostPerLoad: GECO_PRICE_PER_LOAD,
     
     // Ahorros
     savedMoney: 0,
@@ -82,7 +84,7 @@ export const calculateExpenseSummary = (products: Product[], laundryStats?: Laun
     summary.yearlyTimeSpent = (yearlyLoads * laundryStats.timePerLoad) / 60; // Convert to hours
     
     // Cálculos para GECO
-    // cuanto gastas en productos al año ($20 x cargas de lavado a la semana x 52 semanas)
+    // cuanto gastas en productos al año ($10 x cargas de lavado a la semana x 52 semanas)
     summary.gecoYearlyExpense = GECO_PRICE_PER_LOAD * laundryStats.loadsPerWeek * WEEKS_PER_YEAR;
     
     // cuanto tiempo utilizas en lavar al año (80 min - 30 min x cargas de lavado a la semana x 52 semanas)
@@ -96,6 +98,9 @@ export const calculateExpenseSummary = (products: Product[], laundryStats?: Laun
     summary.savedMoney = summary.yearlyExpense - summary.gecoYearlyExpense;
     summary.savedWater = summary.yearlyWaterUsage - summary.gecoYearlyWaterUsage;
     summary.savedTime = summary.yearlyTimeSpent - summary.gecoYearlyTimeSpent;
+    
+    // Calcular costo por carga para productos tradicionales
+    summary.costPerLoad = calculateCostPerLoad(summary.yearlyExpense, laundryStats.loadsPerWeek);
   }
 
   return summary;
@@ -112,4 +117,9 @@ export const formatCurrency = (amount: number): string => {
 
 export const formatNumber = (value: number, unit: string): string => {
   return `${value.toLocaleString('en-US', { maximumFractionDigits: 1 })} ${unit}`;
+};
+
+export const calculateCostPerLoad = (yearlyExpense: number, loadsPerWeek: number): number => {
+  const yearlyLoads = loadsPerWeek * WEEKS_PER_YEAR;
+  return yearlyLoads > 0 ? yearlyExpense / yearlyLoads : 0;
 };

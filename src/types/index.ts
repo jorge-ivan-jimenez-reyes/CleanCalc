@@ -22,11 +22,13 @@ export interface ExpenseSummary {
   yearlyExpense: number;
   yearlyWaterUsage: number; // in liters
   yearlyTimeSpent: number; // in hours
+  costPerLoad: number; // cost per laundry load with traditional products
   
   // Gastos con GECO
   gecoYearlyExpense: number;
   gecoYearlyWaterUsage: number;
   gecoYearlyTimeSpent: number;
+  gecoCostPerLoad: number; // cost per laundry load with GECO
   
   // Ahorros
   savedMoney: number;
