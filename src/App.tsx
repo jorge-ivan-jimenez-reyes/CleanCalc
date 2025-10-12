@@ -151,95 +151,6 @@ function App() {
           </div>
         );
 
-      case 'product-config':
-        return (
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-xl shadow-lg p-8">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                  Configura tus Productos
-                </h2>
-                <p className="text-gray-600">
-                  Ajusta los precios y duración de cada producto seleccionado
-                </p>
-              </div>
-              
-              <div className="space-y-6">
-                {products.map((product) => (
-                  <motion.div
-                    key={product.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="border border-gray-200 rounded-lg p-6"
-                  >
-                    <h3 className="font-semibold text-gray-800 mb-4">{product.name}</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Precio
-                        </label>
-                        <input
-                          type="number"
-                          value={product.price}
-                          onChange={(e) => {
-                            const updatedProducts = products.map(p =>
-                              p.id === product.id
-                                ? { ...p, price: parseFloat(e.target.value) || 0 }
-                                : p
-                            );
-                            setProducts(updatedProducts);
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                          placeholder="0.00"
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                          Duración
-                        </label>
-                        <select
-                          value={product.duration || '1month'}
-                          onChange={(e) => {
-                            const updatedProducts = products.map(p =>
-                              p.id === product.id
-                                ? { ...p, duration: e.target.value }
-                                : p
-                            );
-                            setProducts(updatedProducts);
-                          }}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                        >
-                          <option value="1week">1 semana</option>
-                          <option value="2weeks">2 semanas</option>
-                          <option value="1month">1 mes</option>
-                          <option value="2months">2 meses</option>
-                          <option value="3months">3 meses</option>
-                          <option value="6months">6 meses</option>
-                          <option value="1year">1 año</option>
-                        </select>
-                      </div>
-                      <div className="flex items-end">
-                        <button
-                          onClick={() => handleRemoveProduct(product.id)}
-                          className="w-full bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors"
-                        >
-                          Eliminar
-                        </button>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </div>
-
-              {products.length === 0 && (
-                <div className="text-center py-8">
-                  <p className="text-gray-500">No hay productos seleccionados</p>
-                </div>
-              )}
-            </div>
-          </div>
-        );
-
       case 'results-reveal':
         return (
           <ResultsReveal
@@ -341,7 +252,7 @@ function App() {
             }`}
           >
             <span>
-              {currentStep === 'product-config' ? 'Ver Resultados' : 'Siguiente'}
+              {currentStep === 'product-selection' ? 'Ver Resultados' : 'Siguiente'}
             </span>
             {canProceed ? (
               <ArrowRight className="w-5 h-5" />

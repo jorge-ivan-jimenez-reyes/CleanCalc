@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExpenseSummary } from '../types';
 import { formatCurrency, formatNumber } from '../utils/calculator';
-import { DollarSign, Droplet, Clock, TrendingUp, Sparkles, ArrowDown, Zap } from 'lucide-react';
+import { DollarSign, Droplet, Clock, TrendingUp, Sparkles, ArrowDown, Zap, AlertTriangle } from 'lucide-react';
 
 interface ResultsRevealProps {
   expenseSummary: ExpenseSummary;
@@ -69,7 +69,7 @@ const ResultsReveal: React.FC<ResultsRevealProps> = ({ expenseSummary, onContinu
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-teal-900 flex items-center justify-center p-4">
       <div className="max-w-4xl w-full">
-        <AnimatePresence mode="wait">
+        <AnimatePresence>
           {/* Paso 1: Calculando */}
           {currentStep === 0 && (
             <motion.div
@@ -113,12 +113,11 @@ const ResultsReveal: React.FC<ResultsRevealProps> = ({ expenseSummary, onContinu
                     transition={{ delay: 0.5, duration: 0.6 }}
                     className="bg-red-500/20 rounded-xl p-6"
                   >
-                    <DollarSign className="w-8 h-8 text-red-400 mx-auto mb-3" />
-                    <p className="text-sm text-gray-300 mb-2">Gasto Anual</p>
+                    <AlertTriangle className="w-8 h-8 text-red-400 mx-auto mb-3" />
+                    <p className="text-sm text-gray-300 mb-2">Químicos Dañinos</p>
                     <p className="text-3xl font-bold text-red-400">
                       <CounterAnimation 
-                        value={expenseSummary.yearlyExpense} 
-                        prefix="$" 
+                        value={expenseSummary.totalChemicals} 
                         duration={1500}
                       />
                     </p>
@@ -183,15 +182,22 @@ const ResultsReveal: React.FC<ResultsRevealProps> = ({ expenseSummary, onContinu
                  transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
                  className="bg-red-500/20 backdrop-blur-sm rounded-2xl p-8 border border-red-500/30"
                >
-                <TrendingUp className="w-16 h-16 text-red-400 mx-auto mb-4" />
+                <AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
                 <h3 className="text-2xl font-bold text-red-400 mb-4">
-                  ¡Esto es mucho dinero!
+                  ¡Demasiados químicos dañinos!
                 </h3>
-                <p className="text-lg text-gray-300">
-                  En 5 años gastarías{' '}
-                  <span className="text-3xl font-bold text-red-400">
-                    {formatCurrency(expenseSummary.yearlyExpense * 5)}
+                <p className="text-lg text-gray-300 mb-2">
+                  Estás usando hasta{' '}
+                  <span className="text-4xl font-bold text-red-400 block mt-2">
+                    <CounterAnimation 
+                      value={expenseSummary.totalChemicals} 
+                      suffix=" químicos"
+                      duration={1500}
+                    />
                   </span>
+                </p>
+                <p className="text-sm text-gray-400 mt-3">
+                  Perjudiciales para tu salud y el medio ambiente
                 </p>
               </motion.div>
             </motion.div>
@@ -307,20 +313,16 @@ const ResultsReveal: React.FC<ResultsRevealProps> = ({ expenseSummary, onContinu
                     transition={{ delay: 0.5, type: "spring", bounce: 0.5 }}
                     className="bg-green-600/30 rounded-xl p-6"
                   >
-                    <ArrowDown className="w-8 h-8 text-green-400 mx-auto mb-3" />
-                    <p className="text-sm text-gray-300 mb-2">Ahorro Anual</p>
+                    <AlertTriangle className="w-8 h-8 text-green-400 mx-auto mb-3" />
+                    <p className="text-sm text-gray-300 mb-2">Menos Químicos</p>
                     <p className="text-3xl font-bold text-green-400">
                       <CounterAnimation 
-                        value={Math.max(0, expenseSummary.savedMoney)} 
-                        prefix="$" 
+                        value={expenseSummary.savedChemicals} 
                         duration={2000}
                       />
                     </p>
                     <p className="text-xs text-green-300 mt-2">
-                      {expenseSummary.yearlyExpense > 0 
-                        ? `${((expenseSummary.savedMoney / expenseSummary.yearlyExpense) * 100).toFixed(0)}% menos`
-                        : '0% menos'
-                      }
+                      100% menos químicos
                     </p>
                   </motion.div>
 

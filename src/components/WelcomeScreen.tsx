@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, TrendingDown, Droplet, Clock, ArrowRight } from 'lucide-react';
+import { Sparkles, Droplet, Clock, ArrowRight, ShieldAlert } from 'lucide-react';
 
 interface WelcomeScreenProps {
   onContinue: () => void;
@@ -8,13 +8,6 @@ interface WelcomeScreenProps {
 
 const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinue }) => {
   const benefits = [
-    {
-      icon: <TrendingDown className="w-6 h-6" />,
-      title: "Ahorra hasta 60%",
-      description: "En gastos de lavandería",
-      color: "text-green-600",
-      bgColor: "bg-green-100"
-    },
     {
       icon: <Droplet className="w-6 h-6" />,
       title: "50% menos agua",
@@ -28,6 +21,13 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinue }) => {
       description: "Por cada carga de lavado",
       color: "text-purple-600",
       bgColor: "bg-purple-100"
+    },
+    {
+      icon: <ShieldAlert className="w-6 h-6" />,
+      title: "30 químicos menos",
+      description: "Dañinos para tu salud y el planeta",
+      color: "text-green-600",
+      bgColor: "bg-green-100"
     }
   ];
 
@@ -125,29 +125,6 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinue }) => {
             </motion.div>
           ))}
         </div>
-
-        {/* Mensaje motivacional */}
-        <motion.div 
-          className="bg-gradient-to-r from-teal-50 to-blue-50 rounded-xl p-6 mb-8"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 1.3 }}
-        >
-          <p className="text-gray-700 font-medium mb-2">
-            ¿Sabías que puedes ahorrar hasta{' '}
-            <motion.span 
-              className="text-2xl font-bold text-green-600"
-              animate={{ scale: [1, 1.05, 1] }}
-              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3, ease: "easeInOut" }}
-            >
-              $2,000
-            </motion.span>{' '}
-            al año?
-          </p>
-          <p className="text-sm text-gray-600">
-            Solo necesitamos conocer tus hábitos de lavado actuales
-          </p>
-        </motion.div>
 
         {/* Botón de continuar */}
         <motion.button

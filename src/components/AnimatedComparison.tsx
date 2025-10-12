@@ -4,6 +4,7 @@ import { ExpenseSummary, Product, LaundryStats } from '../types';
 import { formatCurrency, formatNumber } from '../utils/calculator';
 import { exportToExcel, exportSummaryToExcel } from '../utils/excelExport';
 import { DollarSign, Droplet, Clock, TrendingDown, Award, Sparkles, ArrowRight, CheckCircle, Download, FileSpreadsheet } from 'lucide-react';
+import ChemicalsTable from './ChemicalsTable';
 
 interface AnimatedComparisonProps {
   expenseSummary: ExpenseSummary;
@@ -13,7 +14,7 @@ interface AnimatedComparisonProps {
 }
 
 const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary, selectedProducts = [], laundryStats, onRestart }) => {
-  const [activeComparison, setActiveComparison] = useState<'money' | 'water' | 'time' | 'summary'>('money');
+  const [activeComparison, setActiveComparison] = useState<'water' | 'time' | 'summary'>('water');
   const [showSummary, setShowSummary] = useState(false);
 
   useEffect(() => {
@@ -50,17 +51,6 @@ const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary,
   };
 
   const comparisons = [
-    {
-      id: 'money' as const,
-      title: 'Ahorro Económico',
-      icon: <DollarSign className="w-6 h-6" />,
-      traditional: expenseSummary.yearlyExpense,
-      geco: expenseSummary.gecoYearlyExpense,
-      savings: expenseSummary.savedMoney,
-      color: 'green',
-      unit: '$',
-      description: 'Productos tradicionales (múltiples) vs GECO (todo incluido)'
-    },
     {
       id: 'water' as const,
       title: 'Consumo de Agua',
@@ -368,6 +358,11 @@ const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary,
                   </div>
                 </motion.div>
               </div>
+
+              {/* Tabla de Químicos */}
+              {selectedProducts.length > 0 && (
+                <ChemicalsTable products={selectedProducts} />
+              )}
 
               {/* Call to action */}
               <motion.div

@@ -4,7 +4,6 @@ export const FLOW_STEPS: FlowStep[] = [
   'welcome',
   'laundry-habits', 
   'product-selection',
-  'product-config',
   'results-reveal',
   'comparison'
 ];
@@ -46,19 +45,14 @@ export const validateStep = (
       };
       
     case 'product-selection':
-      const hasMinProducts = products.length >= 2;
-      return {
-        isValid: hasMinProducts,
-        message: hasMinProducts ? undefined : 'Selecciona al menos 2 productos para continuar'
-      };
-      
-    case 'product-config':
+      const hasMinProducts = products.length >= 1;
       const allProductsConfigured = products.every(p => 
         p.price > 0 && p.duration && p.name.trim() !== ''
       );
       return {
-        isValid: allProductsConfigured,
-        message: allProductsConfigured ? undefined : 'Completa la información de todos los productos'
+        isValid: hasMinProducts && allProductsConfigured,
+        message: !hasMinProducts ? 'Selecciona al menos 1 producto para continuar' : 
+                 !allProductsConfigured ? 'Completa el precio y duración de todos los productos' : undefined
       };
       
     case 'results-reveal':
@@ -78,8 +72,6 @@ export const getStepTitle = (step: FlowStep): string => {
       return 'Tus Hábitos de Lavado';
     case 'product-selection':
       return 'Selecciona tus Productos';
-    case 'product-config':
-      return 'Configura tus Productos';
     case 'results-reveal':
       return 'Tus Gastos Actuales';
     case 'comparison':
@@ -96,9 +88,7 @@ export const getStepDescription = (step: FlowStep): string => {
     case 'laundry-habits':
       return 'Cuéntanos sobre tus hábitos de lavado para calcular tus gastos';
     case 'product-selection':
-      return 'Selecciona los productos que usas actualmente (mínimo 2)';
-    case 'product-config':
-      return 'Completa la información de cada producto';
+      return 'Selecciona los productos que usas actualmente';
     case 'results-reveal':
       return 'Veamos cuánto gastas actualmente...';
     case 'comparison':

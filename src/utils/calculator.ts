@@ -1,4 +1,5 @@
 import { Product, ExpenseSummary, LaundryStats, getDurationInWeeks } from '../types';
+import { calculateTotalChemicals } from '../data/chemicals';
 
 const WEEKS_PER_YEAR = 52;
 const MONTHS_PER_YEAR = 12;
@@ -19,17 +20,20 @@ export const calculateExpenseSummary = (products: Product[], laundryStats?: Laun
     yearlyWaterUsage: 0,
     yearlyTimeSpent: 0,
     costPerLoad: 0,
+    totalChemicals: calculateTotalChemicals(products),
     
     // Gastos con GECO
     gecoYearlyExpense: 0,
     gecoYearlyWaterUsage: 0,
     gecoYearlyTimeSpent: 0,
     gecoCostPerLoad: GECO_PRICE_PER_LOAD,
+    gecoChemicals: 0,
     
     // Ahorros
     savedMoney: 0,
     savedWater: 0,
-    savedTime: 0
+    savedTime: 0,
+    savedChemicals: calculateTotalChemicals(products)
   };
 
   const summary = products.reduce((summary, product) => {

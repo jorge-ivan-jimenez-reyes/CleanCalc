@@ -23,17 +23,20 @@ export interface ExpenseSummary {
   yearlyWaterUsage: number; // in liters
   yearlyTimeSpent: number; // in hours
   costPerLoad: number; // cost per laundry load with traditional products
+  totalChemicals: number; // total harmful chemicals
   
   // Gastos con GECO
   gecoYearlyExpense: number;
   gecoYearlyWaterUsage: number;
   gecoYearlyTimeSpent: number;
   gecoCostPerLoad: number; // cost per laundry load with GECO
+  gecoChemicals: number; // chemicals in GECO (0)
   
   // Ahorros
   savedMoney: number;
   savedWater: number;
   savedTime: number;
+  savedChemicals: number; // chemicals avoided
 }
 
 export interface LaundryStats {
