@@ -48,7 +48,7 @@ const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
   
   const MINIMUM_PRODUCTS = 1;
   const isValid = selectedProducts.length >= MINIMUM_PRODUCTS && 
-                  selectedProducts.every(p => p.price > 0 && p.duration);
+                  selectedProducts.every(p => p.duration);
 
   useEffect(() => {
     onValidationChange(isValid);
@@ -149,7 +149,7 @@ const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
           >
             <h3 className="font-semibold text-green-800 mb-3 flex items-center">
               <Check className="w-5 h-5 mr-2" />
-              Productos Seleccionados - Configura precio y duración
+              Productos Seleccionados - Configura duración
             </h3>
             <div className="space-y-3">
               {selectedProducts.map((product, index) => (
@@ -176,28 +176,7 @@ const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
                     </button>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Precio ($)
-                      </label>
-                      <input
-                        type="number"
-                        value={product.price || ''}
-                        onChange={(e) => {
-                          const updatedProducts = selectedProducts.map(p =>
-                            p.id === product.id
-                              ? { ...p, price: parseFloat(e.target.value) || 0 }
-                              : p
-                          );
-                          onProductsChange(updatedProducts);
-                        }}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500"
-                        placeholder="Ej: 150"
-                        min="0"
-                        step="0.01"
-                      />
-                    </div>
+                  <div className="grid grid-cols-1 gap-3">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">
                         Duración
@@ -315,10 +294,10 @@ const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
           <AlertCircle className="w-5 h-5 text-blue-600 mr-3 mt-0.5" />
           <div>
             <p className="text-blue-800 font-medium text-sm">
-              Configura el precio y duración de cada producto
+              Configura la duración de cada producto
             </p>
             <p className="text-blue-700 text-xs mt-1">
-              El precio es lo que pagaste por el producto y la duración es cuánto tiempo te dura
+              Indica cuánto tiempo te dura cada producto para mejorar la comparación
             </p>
           </div>
         </div>

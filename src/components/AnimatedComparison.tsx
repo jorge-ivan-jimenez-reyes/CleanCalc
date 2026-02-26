@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExpenseSummary, Product, LaundryStats } from '../types';
-import { formatCurrency, formatNumber } from '../utils/calculator';
-import { exportToExcel, exportSummaryToExcel } from '../utils/excelExport';
-import { DollarSign, Droplet, Clock, TrendingDown, Award, Sparkles, ArrowRight, CheckCircle, Download, FileSpreadsheet } from 'lucide-react';
+import { formatNumber } from '../utils/calculator';
+import { Droplet, Clock, TrendingDown, Award, Sparkles, ArrowRight, CheckCircle } from 'lucide-react';
 import ChemicalsTable from './ChemicalsTable';
 
 interface AnimatedComparisonProps {
@@ -13,7 +12,7 @@ interface AnimatedComparisonProps {
   onRestart: () => void;
 }
 
-const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary, selectedProducts = [], laundryStats, onRestart }) => {
+const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary, selectedProducts = [], onRestart }) => {
   const [activeComparison, setActiveComparison] = useState<'water' | 'time' | 'summary'>('water');
   const [showSummary, setShowSummary] = useState(false);
 
@@ -21,34 +20,6 @@ const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary,
     const timer = setTimeout(() => setShowSummary(true), 2000);
     return () => clearTimeout(timer);
   }, []);
-
-  const handleExportComplete = async () => {
-    if (selectedProducts.length > 0 && laundryStats) {
-      try {
-        const fileName = await exportToExcel({
-          expenseSummary,
-          selectedProducts,
-          laundryStats
-        });
-        alert(`¡Excel exportado exitosamente! Archivo: ${fileName}`);
-      } catch (error) {
-        alert('Error al exportar el archivo Excel');
-        console.error(error);
-      }
-    } else {
-      alert('No hay datos suficientes para exportar');
-    }
-  };
-
-  const handleExportSummary = async () => {
-    try {
-      const fileName = await exportSummaryToExcel(expenseSummary);
-      alert(`¡Resumen exportado exitosamente! Archivo: ${fileName}`);
-    } catch (error) {
-      alert('Error al exportar el resumen');
-      console.error(error);
-    }
-  };
 
   const comparisons = [
     {
@@ -337,12 +308,6 @@ const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary,
                     Impacto en 5 años
                   </h3>
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
-                      <span className="text-gray-700">Ahorro total:</span>
-                      <span className="font-bold text-green-600">
-                        {formatCurrency(Math.max(0, expenseSummary.savedMoney) * 5)}
-                      </span>
-                    </div>
                     <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
                       <span className="text-gray-700">Agua ahorrada:</span>
                       <span className="font-bold text-blue-600">
@@ -378,26 +343,6 @@ const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary,
                   <p className="text-lg mb-6">
                     Únete a la revolución del lavado inteligente
                   </p>
-                  {/* Botones de exportación */}
-                  <div className="flex flex-col sm:flex-row gap-3 justify-center mb-6">
-                    <button
-                      onClick={handleExportSummary}
-                      className="bg-green-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center"
-                    >
-                      <Download className="w-4 h-4 mr-2" />
-                      Exportar Resumen
-                    </button>
-                    {selectedProducts.length > 0 && laundryStats && (
-                      <button
-                        onClick={handleExportComplete}
-                        className="bg-blue-600 text-white font-medium py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center"
-                      >
-                        <FileSpreadsheet className="w-4 h-4 mr-2" />
-                        Exportar Análisis Completo
-                      </button>
-                    )}
-                  </div>
-
                   <div className="flex flex-col sm:flex-row gap-4 justify-center">
                     <button
                       onClick={onRestart}
@@ -405,10 +350,13 @@ const AnimatedComparison: React.FC<AnimatedComparisonProps> = ({ expenseSummary,
                     >
                       Calcular de Nuevo
                     </button>
-                    <button className="bg-teal-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-teal-700 transition-colors flex items-center justify-center">
+                    <a
+                      href="https://clean-calc.vercel.app/"
+                      className="bg-teal-600 text-white font-bold py-3 px-6 rounded-xl hover:bg-teal-700 transition-colors flex items-center justify-center"
+                    >
                       Conocer más sobre GECO
                       <ArrowRight className="w-5 h-5 ml-2" />
-                    </button>
+                    </a>
                   </div>
                 </div>
               </motion.div>

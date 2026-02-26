@@ -47,12 +47,12 @@ export const validateStep = (
     case 'product-selection':
       const hasMinProducts = products.length >= 1;
       const allProductsConfigured = products.every(p => 
-        p.price > 0 && p.duration && p.name.trim() !== ''
+        p.duration && p.name.trim() !== ''
       );
       return {
         isValid: hasMinProducts && allProductsConfigured,
         message: !hasMinProducts ? 'Selecciona al menos 1 producto para continuar' : 
-                 !allProductsConfigured ? 'Completa el precio y duración de todos los productos' : undefined
+                 !allProductsConfigured ? 'Completa la duración de todos los productos' : undefined
       };
       
     case 'results-reveal':
