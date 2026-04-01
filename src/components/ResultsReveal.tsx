@@ -179,7 +179,7 @@ const ResultsReveal: React.FC<ResultsRevealProps> = ({ expenseSummary, onContinu
                      "0 0 0 0 rgba(239, 68, 68, 0)"
                    ]
                  }}
-                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                 transition={{ duration: 3, repeat: 0, ease: "easeInOut" }}
                  className="bg-red-500/20 backdrop-blur-sm rounded-2xl p-8 border border-red-500/30"
                >
                 <AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
