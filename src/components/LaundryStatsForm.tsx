@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { LaundryStats } from '../types';
-import { WashingMachine } from 'lucide-react';
 
 interface LaundryStatsFormProps {
   onStatsUpdate: (stats: LaundryStats) => void;
@@ -9,72 +9,51 @@ interface LaundryStatsFormProps {
 const LaundryStatsForm: React.FC<LaundryStatsFormProps> = ({ onStatsUpdate }) => {
   const [stats, setStats] = useState<LaundryStats>({
     loadsPerWeek: 3,
-    timePerLoad: 80, // Fijo en 80 minutos
-    waterPerLoad: 95 // Fijo en 95 litros
+    timePerLoad: 80,
+    waterPerLoad: 95
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    const newStats = {
-      ...stats,
-      [name]: parseInt(value) || 0
-    };
+    const newStats = { ...stats, [name]: parseInt(value) || 0 };
     setStats(newStats);
     onStatsUpdate(newStats);
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 transition-all hover:shadow-md border border-gray-100">
-      <div className="flex items-center mb-4">
-        <div className="bg-teal-100 p-2 rounded-full mr-3">
-          <WashingMachine className="w-5 h-5 text-teal-600" />
-        </div>
-        <h2 className="text-lg font-semibold text-gray-800">Hábitos de Lavado</h2>
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+    >
+      <p className="text-sm text-gray-400 mb-6">Esto nos ayuda a calcular tu consumo actual</p>
+
+      <div className="mb-8">
+        <label htmlFor="loadsPerWeek" className="block text-sm font-medium text-gray-700 mb-2">
+          Cargas de lavado por semana
+        </label>
+        <input
+          type="number"
+          id="loadsPerWeek"
+          name="loadsPerWeek"
+          value={stats.loadsPerWeek}
+          onChange={handleChange}
+          min="1"
+          className="w-full max-w-[160px] px-4 py-3 border border-gray-200 rounded-lg text-2xl font-bold text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all"
+        />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-          <div className="flex items-center mb-2">
-            <WashingMachine className="w-4 h-4 text-teal-600 mr-2 opacity-70" />
-            <label htmlFor="loadsPerWeek" className="block text-sm font-medium text-gray-700">
-              Cargas por Semana
-            </label>
-          </div>
-          <input
-            type="number"
-            id="loadsPerWeek"
-            name="loadsPerWeek"
-            value={stats.loadsPerWeek}
-            onChange={handleChange}
-            min="1"
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white text-sm"
-          />
-          <p className="text-xs text-gray-500 mt-1 italic">
-            ¿Cuántas veces lavas ropa a la semana?
-          </p>
+      <div className="flex gap-12 text-sm">
+        <div>
+          <p className="text-gray-400 mb-1">Tiempo por carga</p>
+          <p className="text-lg font-semibold text-gray-900">80 min</p>
         </div>
-
-        <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-          <div className="text-sm font-medium text-gray-700 mb-2">
-            Tiempo por Carga
-          </div>
-          <div className="text-lg font-semibold text-gray-800">80 minutos</div>
-          <p className="text-xs text-gray-500 mt-1 italic">
-            Tiempo fijo establecido
-          </p>
-        </div>
-
-        <div className="bg-gray-50 p-3 rounded-lg border border-gray-100">
-          <div className="text-sm font-medium text-gray-700 mb-2">
-            Agua por Carga
-          </div>
-          <div className="text-lg font-semibold text-gray-800">95 litros</div>
-          <p className="text-xs text-gray-500 mt-1 italic">
-            Consumo promedio establecido
-          </p>
+        <div>
+          <p className="text-gray-400 mb-1">Agua por carga</p>
+          <p className="text-lg font-semibold text-gray-900">95 L</p>
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

@@ -1,386 +1,225 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useRef, useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { gsap } from 'gsap';
+import { useGSAP } from '@gsap/react';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ExpenseSummary } from '../types';
-import { formatCurrency, formatNumber } from '../utils/calculator';
-import { DollarSign, Droplet, Clock, TrendingUp, Sparkles, ArrowDown, Zap, AlertTriangle } from 'lucide-react';
+import { ArrowRight, ArrowDown } from 'lucide-react';
+
+gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 interface ResultsRevealProps {
   expenseSummary: ExpenseSummary;
   onContinue: () => void;
 }
 
-const ResultsReveal: React.FC<ResultsRevealProps> = ({ expenseSummary, onContinue }) => {
-  const [currentStep, setCurrentStep] = useState(0);
-  const [showGeco, setShowGeco] = useState(false);
-
-  const steps = [
-    'calculating',
-    'current-expenses',
-    'impact-reveal',
-    'geco-intro',
-    'savings-reveal'
-  ];
+// Animated donut
+const DonutChart = ({ percentage, color, size = 110, strokeWidth = 7, delay = 0 }: {
+  percentage: number; color: string; size?: number; strokeWidth?: number; delay?: number;
+}) => {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = 2 * Math.PI * radius;
+  const center = size / 2;
+  const [offset, setOffset] = useState(circumference);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      if (currentStep < steps.length - 1) {
-        setCurrentStep(currentStep + 1);
-      }
-    }, currentStep === 0 ? 2000 : currentStep === 1 ? 3000 : 2500);
-
-    if (currentStep === 3) {
-      setTimeout(() => setShowGeco(true), 1000);
-    }
-
-    return () => clearTimeout(timer);
-  }, [currentStep]);
-
-  const CounterAnimation = ({ value, prefix = '', suffix = '', duration = 2000 }: {
-    value: number;
-    prefix?: string;
-    suffix?: string;
-    duration?: number;
-  }) => {
-    const [count, setCount] = useState(0);
-
-    useEffect(() => {
-      const increment = value / (duration / 50);
-      const timer = setInterval(() => {
-        setCount(prev => {
-          const next = prev + increment;
-          if (next >= value) {
-            clearInterval(timer);
-            return value;
-          }
-          return next;
-        });
-      }, 50);
-
-      return () => clearInterval(timer);
-    }, [value, duration]);
-
-    return (
-      <span>
-        {prefix}{Math.round(count).toLocaleString()}{suffix}
-      </span>
-    );
-  };
+    const t = setTimeout(() => {
+      setOffset(circumference - (circumference * Math.min(percentage, 100)) / 100);
+    }, delay * 1000);
+    return () => clearTimeout(t);
+  }, [percentage, circumference, delay]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-teal-900 flex items-center justify-center p-4">
-      <div className="max-w-4xl w-full">
-        <AnimatePresence>
-          {/* Paso 1: Calculando */}
-          {currentStep === 0 && (
-            <motion.div
-              key="calculating"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 1.2 }}
-              className="text-center text-white"
-            >
-              <motion.div
-                animate={{ rotate: 360 }}
-                transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
-                className="w-20 h-20 border-4 border-teal-400 border-t-transparent rounded-full mx-auto mb-8"
-              />
-              <h2 className="text-3xl font-bold mb-4">Analizando tus gastos...</h2>
-              <p className="text-xl text-gray-300">Calculando el impacto en tu economía</p>
-            </motion.div>
-          )}
+    <svg width={size} height={size} className="transform -rotate-90">
+      <circle cx={center} cy={center} r={radius} fill="none" stroke="#f3f4f6" strokeWidth={strokeWidth} />
+      <circle
+        cx={center} cy={center} r={radius} fill="none"
+        stroke={color} strokeWidth={strokeWidth} strokeLinecap="round"
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        style={{ transition: `stroke-dashoffset 1.5s cubic-bezier(0.16, 1, 0.3, 1)` }}
+      />
+    </svg>
+  );
+};
 
-          {/* Paso 2: Gastos actuales */}
-          {currentStep >= 1 && (
-            <motion.div
-              key="current-expenses"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-center text-white mb-8"
-            >
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                transition={{ duration: 0.8, type: "spring", bounce: 0.5 }}
-                className="bg-white/10 backdrop-blur-sm rounded-2xl p-8 mb-6"
-              >
-                <h2 className="text-2xl font-bold mb-6">Tus Gastos Actuales</h2>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.5, duration: 0.6 }}
-                    className="bg-red-500/20 rounded-xl p-6"
-                  >
-                    <AlertTriangle className="w-8 h-8 text-red-400 mx-auto mb-3" />
-                    <p className="text-sm text-gray-300 mb-2">Químicos Dañinos</p>
-                    <p className="text-3xl font-bold text-red-400">
-                      <CounterAnimation 
-                        value={expenseSummary.totalChemicals} 
-                        duration={1500}
-                      />
-                    </p>
-                  </motion.div>
+const Counter = ({ value, prefix = '', suffix = '' }: { value: number; prefix?: string; suffix?: string }) => {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    const steps = 50;
+    let frame = 0;
+    const timer = setInterval(() => {
+      frame++;
+      setCount(Math.round(value * (1 - Math.pow(1 - frame / steps, 3))));
+      if (frame >= steps) clearInterval(timer);
+    }, 30);
+    return () => clearInterval(timer);
+  }, [value]);
+  return <>{prefix}{count.toLocaleString()}{suffix}</>;
+};
 
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.7, duration: 0.6 }}
-                    className="bg-blue-500/20 rounded-xl p-6"
-                  >
-                    <Droplet className="w-8 h-8 text-blue-400 mx-auto mb-3" />
-                    <p className="text-sm text-gray-300 mb-2">Agua Anual</p>
-                    <p className="text-3xl font-bold text-blue-400">
-                      <CounterAnimation 
-                        value={expenseSummary.yearlyWaterUsage} 
-                        suffix=" L" 
-                        duration={1500}
-                      />
-                    </p>
-                  </motion.div>
+const ResultsReveal: React.FC<ResultsRevealProps> = ({ expenseSummary, onContinue }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
 
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.9, duration: 0.6 }}
-                    className="bg-purple-500/20 rounded-xl p-6"
-                  >
-                    <Clock className="w-8 h-8 text-purple-400 mx-auto mb-3" />
-                    <p className="text-sm text-gray-300 mb-2">Tiempo Anual</p>
-                    <p className="text-3xl font-bold text-purple-400">
-                      <CounterAnimation 
-                        value={expenseSummary.yearlyTimeSpent} 
-                        suffix=" hrs" 
-                        duration={1500}
-                      />
-                    </p>
-                  </motion.div>
+  useGSAP(() => {
+    const sections = gsap.utils.toArray<HTMLElement>('.reveal-section');
+
+    sections.forEach((section) => {
+      gsap.from(section, {
+        autoAlpha: 0,
+        y: 50,
+        filter: 'blur(8px)',
+        duration: 0.8,
+        ease: 'power3.out',
+        scrollTrigger: {
+          trigger: section,
+          start: 'top 80%',
+          toggleActions: 'play none none none',
+        },
+      });
+    });
+  }, { scope: containerRef });
+
+  return (
+    <div ref={containerRef} className="min-h-screen px-6 py-16">
+      <div className="max-w-lg mx-auto">
+
+        {/* Section 1: What you use today */}
+        <div className="reveal-section mb-20 invisible">
+          <p className="text-sm text-gray-400 mb-1">Tus resultados</p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-10">Esto usas cada año</h2>
+
+          <div className="grid grid-cols-3 gap-6 text-center">
+            {[
+              { label: 'Químicos', value: expenseSummary.totalChemicals, color: '#ef4444', pct: Math.min(expenseSummary.totalChemicals * 14, 100) },
+              { label: 'Agua', value: expenseSummary.yearlyWaterUsage, suffix: ' L', color: '#3b82f6', pct: 85 },
+              { label: 'Tiempo', value: expenseSummary.yearlyTimeSpent, suffix: ' hrs', color: '#8b5cf6', pct: 70 },
+            ].map((item, i) => (
+              <div key={i}>
+                <div className="relative inline-block mb-3">
+                  <DonutChart percentage={item.pct} color={item.color} delay={0.3 + i * 0.2} />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-lg font-bold text-gray-900 tabular-nums">
+                      <Counter value={item.value} suffix={item.suffix || ''} />
+                    </span>
+                  </div>
                 </div>
-              </motion.div>
-            </motion.div>
-          )}
+                <p className="text-xs text-gray-400">{item.label}</p>
+              </div>
+            ))}
+          </div>
 
-          {/* Paso 3: Impacto revelado */}
-          {currentStep >= 2 && (
-            <motion.div
-              key="impact"
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.8 }}
-              className="text-center text-white mb-8"
-            >
-                             <motion.div
-                 animate={{ 
-                   scale: [1, 1.02, 1],
-                   boxShadow: [
-                     "0 0 0 0 rgba(239, 68, 68, 0.4)",
-                     "0 0 0 10px rgba(239, 68, 68, 0)",
-                     "0 0 0 0 rgba(239, 68, 68, 0)"
-                   ]
-                 }}
-                 transition={{ duration: 3, repeat: 0, ease: "easeInOut" }}
-                 className="bg-red-500/20 backdrop-blur-sm rounded-2xl p-8 border border-red-500/30"
-               >
-                <AlertTriangle className="w-16 h-16 text-red-400 mx-auto mb-4" />
-                <h3 className="text-2xl font-bold text-red-400 mb-4">
-                  ¡Demasiados químicos dañinos!
-                </h3>
-                <p className="text-lg text-gray-300 mb-2">
-                  Estás usando hasta{' '}
-                  <span className="text-4xl font-bold text-red-400 block mt-2">
-                    <CounterAnimation 
-                      value={expenseSummary.totalChemicals} 
-                      suffix=" químicos"
-                      duration={1500}
-                    />
-                  </span>
-                </p>
-                <p className="text-sm text-gray-400 mt-3">
-                  Perjudiciales para tu salud y el medio ambiente
-                </p>
-              </motion.div>
-            </motion.div>
-          )}
+        </div>
 
-          {/* Paso 4: Introducción a GECO */}
-          {currentStep >= 3 && (
-            <motion.div
-              key="geco-intro"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-center text-white mb-8"
-            >
+        {/* Scroll hint */}
+        <div className="reveal-section flex justify-center mb-20 invisible">
+          <motion.div
+            animate={{ y: [0, 8, 0] }}
+            transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+            className="text-gray-300"
+          >
+            <ArrowDown className="w-5 h-5" />
+          </motion.div>
+        </div>
+
+        {/* Section 2: The problem */}
+        <div className="reveal-section mb-20 text-center invisible">
+          <div className="inline-block mb-6">
+            <DonutChart percentage={100} color="#ef4444" size={130} strokeWidth={8} delay={0.2} />
+            <div className="relative -mt-[100px] flex items-center justify-center h-[70px]">
+              <span className="text-4xl font-bold text-red-500">
+                <Counter value={expenseSummary.totalChemicals} />
+              </span>
+            </div>
+          </div>
+          <h3 className="text-2xl font-bold text-gray-900 mt-6 mb-2">químicos dañinos</h3>
+          <p className="text-sm text-gray-400 max-w-xs mx-auto">
+            En tus productos actuales, perjudiciales para tu salud y el medio ambiente
+          </p>
+        </div>
+
+        {/* Section 3: Before / After visual */}
+        <div className="reveal-section mb-20 invisible">
+          <h3 className="text-xl font-bold text-gray-900 mb-6 text-center">¿Y si solo necesitaras uno?</h3>
+          <div className="flex items-center gap-4">
+            {/* Before */}
+            <div className="flex-1 bg-red-50 rounded-xl p-5 border border-red-100">
+              <p className="text-[10px] uppercase tracking-wider text-red-400 font-medium mb-3">Hoy usas</p>
+              <div className="space-y-2">
+                {['Detergente', 'Suavizante', 'Desinfectante', 'Potenciador'].map((p, i) => (
+                  <motion.div
+                    key={i}
+                    className="text-xs bg-white text-red-500 px-3 py-1.5 rounded-lg border border-red-100"
+                    initial={{ opacity: 0, x: -10 }}
+                    whileInView={{ opacity: 1, x: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.1 }}
+                  >
+                    {p}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Arrow */}
+            <ArrowRight className="w-5 h-5 text-gray-300 flex-shrink-0" />
+
+            {/* After */}
+            <div className="flex-1 bg-blue-50 rounded-xl p-5 border border-blue-100">
+              <p className="text-[10px] uppercase tracking-wider text-blue-500 font-medium mb-3">Con GECO</p>
+              <div className="w-14 h-14 bg-blue-500 rounded-xl flex items-center justify-center mb-3">
+                <span className="text-white font-bold text-lg">G</span>
+              </div>
+              <p className="text-xs text-gray-600 mb-1">Todo en uno</p>
+              <p className="text-xs text-gray-400">2 tabletas por carga</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 4: Your savings */}
+        <div className="reveal-section mb-12 invisible">
+          <p className="text-sm text-blue-500 font-medium mb-1">Con GECO ahorras</p>
+          <h2 className="text-3xl font-bold text-gray-900 mb-8">Tu ahorro anual</h2>
+
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            {[
+              { label: 'Químicos eliminados', value: expenseSummary.savedChemicals, suffix: '', color: '#10b981', pct: 100 },
+              { label: 'Litros de agua', value: Math.max(0, expenseSummary.savedWater), suffix: ' L', color: '#3b82f6', pct: 50 },
+              { label: 'Horas libres', value: Math.max(0, expenseSummary.savedTime), suffix: ' hrs', color: '#8b5cf6', pct: 38 },
+            ].map((item, i) => (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.5 }}
-                className="mb-6"
+                key={i}
+                className="text-center p-4 bg-gray-50 rounded-xl"
+                initial={{ opacity: 0, y: 15 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 + i * 0.1 }}
               >
-                <h3 className="text-xl text-gray-300 mb-4">Pero espera...</h3>
-                <motion.h2
-                  initial={{ scale: 0 }}
-                  animate={{ scale: showGeco ? 1 : 0 }}
-                  transition={{ type: "spring", bounce: 0.6, duration: 1 }}
-                  className="text-4xl font-bold bg-gradient-to-r from-teal-400 to-blue-400 bg-clip-text text-transparent mb-4"
-                >
-                  ¿Y si hubiera una mejor opción?
-                </motion.h2>
-              </motion.div>
-
-              <AnimatePresence>
-                {showGeco && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0, rotateY: 180 }}
-                    animate={{ opacity: 1, scale: 1, rotateY: 0 }}
-                    transition={{ duration: 1, type: "spring", bounce: 0.4 }}
-                    className="bg-gradient-to-br from-teal-500/20 to-blue-500/20 backdrop-blur-sm rounded-2xl p-8 border border-teal-500/30"
-                  >
-                                         <motion.div
-                       animate={{ 
-                         rotate: [0, 2, -2, 0],
-                         scale: [1, 1.05, 1]
-                       }}
-                       transition={{ duration: 4, repeat: Infinity, repeatDelay: 2, ease: "easeInOut" }}
-                       className="w-24 h-24 bg-gradient-to-br from-teal-400 to-blue-400 rounded-full flex items-center justify-center mx-auto mb-6"
-                     >
-                      <Sparkles className="w-12 h-12 text-white" />
-                    </motion.div>
-                    
-                                         <h3 className="text-3xl font-bold text-teal-400 mb-4">
-                       Conoce GECO
-                     </h3>
-                     <p className="text-lg text-gray-300 mb-4">
-                       <strong className="text-teal-400">TODO EN UNO:</strong> detergente + suavizante + desinfectante + aroma
-                     </p>
-                     <p className="text-sm text-gray-400 mb-6">
-                       ¡No necesitas comprar productos adicionales!
-                     </p>
-                    
-                                         <div className="grid grid-cols-3 gap-4 text-sm">
-                       <div className="text-center">
-                         <Zap className="w-6 h-6 text-yellow-400 mx-auto mb-2" />
-                         <p className="text-yellow-400">Todo incluido</p>
-                         <p className="text-xs text-gray-400">2 tabletas/carga</p>
-                       </div>
-                       <div className="text-center">
-                         <Droplet className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-                         <p className="text-blue-400">Eco-friendly</p>
-                         <p className="text-xs text-gray-400">50% menos agua</p>
-                       </div>
-                       <div className="text-center">
-                         <DollarSign className="w-6 h-6 text-green-400 mx-auto mb-2" />
-                         <p className="text-green-400">Solo $10/carga</p>
-                         <p className="text-xs text-gray-400">vs múltiples productos</p>
-                       </div>
-                     </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          )}
-
-          {/* Paso 5: Revelación de ahorros */}
-          {currentStep >= 4 && (
-            <motion.div
-              key="savings"
-              initial={{ opacity: 0, y: 50 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-center text-white"
-            >
-                             <motion.div
-                 animate={{ 
-                   scale: [1, 1.01, 1],
-                   boxShadow: [
-                     "0 0 0 0 rgba(34, 197, 94, 0.3)",
-                     "0 0 0 8px rgba(34, 197, 94, 0)",
-                     "0 0 0 0 rgba(34, 197, 94, 0)"
-                   ]
-                 }}
-                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                 className="bg-green-500/20 backdrop-blur-sm rounded-2xl p-8 border border-green-500/30 mb-8"
-               >
-                <h3 className="text-2xl font-bold text-green-400 mb-6">
-                  ¡Mira cuánto puedes ahorrar con GECO!
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.5, type: "spring", bounce: 0.5 }}
-                    className="bg-green-600/30 rounded-xl p-6"
-                  >
-                    <AlertTriangle className="w-8 h-8 text-green-400 mx-auto mb-3" />
-                    <p className="text-sm text-gray-300 mb-2">Menos Químicos</p>
-                    <p className="text-3xl font-bold text-green-400">
-                      <CounterAnimation 
-                        value={expenseSummary.savedChemicals} 
-                        duration={2000}
-                      />
-                    </p>
-                    <p className="text-xs text-green-300 mt-2">
-                      100% menos químicos
-                    </p>
-                  </motion.div>
-
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.7, type: "spring", bounce: 0.5 }}
-                    className="bg-blue-600/30 rounded-xl p-6"
-                  >
-                    <Droplet className="w-8 h-8 text-blue-400 mx-auto mb-3" />
-                    <p className="text-sm text-gray-300 mb-2">Menos Agua</p>
-                    <p className="text-3xl font-bold text-blue-400">
-                      <CounterAnimation 
-                        value={Math.max(0, expenseSummary.savedWater)} 
-                        suffix=" L" 
-                        duration={2000}
-                      />
-                    </p>
-                    <p className="text-xs text-blue-300 mt-2">50% reducción</p>
-                  </motion.div>
-
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.9, type: "spring", bounce: 0.5 }}
-                    className="bg-purple-600/30 rounded-xl p-6"
-                  >
-                    <Clock className="w-8 h-8 text-purple-400 mx-auto mb-3" />
-                    <p className="text-sm text-gray-300 mb-2">Tiempo Ahorrado</p>
-                    <p className="text-3xl font-bold text-purple-400">
-                      <CounterAnimation 
-                        value={Math.max(0, expenseSummary.savedTime)} 
-                        suffix=" hrs" 
-                        duration={2000}
-                      />
-                    </p>
-                    <p className="text-xs text-purple-300 mt-2">30 min menos por carga</p>
-                  </motion.div>
+                <div className="relative inline-block mb-2">
+                  <DonutChart percentage={item.pct} color={item.color} size={80} strokeWidth={5} delay={0.3 + i * 0.15} />
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-sm font-bold text-gray-900 tabular-nums">
+                      <Counter value={item.value} prefix={(item as any).prefix || ''} />
+                    </span>
+                  </div>
                 </div>
-
-                <motion.button
-                  onClick={onContinue}
-                  className="bg-gradient-to-r from-teal-500 to-blue-500 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300"
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 1.5 }}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  Ver Comparación Detallada
-                </motion.button>
+                <p className="text-xs text-gray-400">{item.label}</p>
               </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+            ))}
+          </div>
+
+          <motion.button
+            onClick={onContinue}
+            className="bg-blue-500 text-white font-medium py-3.5 px-7 rounded-lg flex items-center gap-3 hover:bg-blue-600 transition-colors mt-6"
+            whileTap={{ scale: 0.98 }}
+          >
+            <span>Ver comparación detallada</span>
+            <ArrowRight className="w-4 h-4" />
+          </motion.button>
+        </div>
       </div>
     </div>
   );
 };
 
-export default ResultsReveal; 
+export default ResultsReveal;

@@ -13,6 +13,7 @@ import ProductSelectionStep from './components/ProductSelectionStep';
 import ProductForm from './components/ProductForm';
 import ResultsReveal from './components/ResultsReveal';
 import AnimatedComparison from './components/AnimatedComparison';
+import AnimatedBackground from './components/AnimatedBackground';
 
 // Iconos
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
@@ -124,29 +125,15 @@ function App() {
         return <WelcomeScreen onContinue={handleNextStep} />;
 
       case 'laundry-habits':
-        return (
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-white rounded-xl shadow-lg p-8">
-              <div className="text-center mb-8">
-                <h2 className="text-2xl font-bold text-gray-800 mb-4">
-                  Cuéntanos sobre tus Hábitos de Lavado
-                </h2>
-                <p className="text-gray-600">
-                  Esta información nos ayudará a calcular tus gastos actuales
-                </p>
-              </div>
-              <LaundryStatsForm onStatsUpdate={setLaundryStats} />
-            </div>
-          </div>
-        );
-
       case 'product-selection':
         return (
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-2xl mx-auto">
             <ProductSelectionStep
               selectedProducts={products}
               onProductsChange={handleProductsChange}
               onValidationChange={handleValidationChange}
+              laundryStats={laundryStats}
+              onStatsUpdate={setLaundryStats}
             />
           </div>
         );
@@ -177,24 +164,29 @@ function App() {
   // Si estamos en welcome o results-reveal, mostrar pantalla completa
   if (currentStep === 'welcome' || currentStep === 'results-reveal' || currentStep === 'comparison') {
     return (
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentStep}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          {renderStepContent()}
-        </motion.div>
-      </AnimatePresence>
+      <>
+        <AnimatedBackground />
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={currentStep}
+            style={{ position: 'relative', zIndex: 1 }}
+            initial={{ opacity: 0, filter: 'blur(8px)', scale: 0.98 }}
+            animate={{ opacity: 1, filter: 'blur(0px)', scale: 1 }}
+            exit={{ opacity: 0, filter: 'blur(6px)', scale: 1.02 }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
+          >
+            {renderStepContent()}
+          </motion.div>
+        </AnimatePresence>
+      </>
     );
   }
 
   // Para otros pasos, mostrar con navegación
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen py-8 px-4" style={{ position: 'relative', zIndex: 1 }}>
+      <AnimatedBackground />
+      <div className="max-w-2xl mx-auto">
         {/* Barra de progreso */}
         <StepProgressBar 
           currentStep={currentStep} 
@@ -205,10 +197,10 @@ function App() {
         <AnimatePresence mode="wait">
           <motion.div
             key={currentStep}
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -20 }}
-            transition={{ duration: 0.3 }}
+            initial={{ opacity: 0, y: 30, filter: 'blur(6px)' }}
+            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+            exit={{ opacity: 0, y: -20, filter: 'blur(4px)' }}
+            transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
           >
             {renderStepContent()}
           </motion.div>
@@ -219,11 +211,14 @@ function App() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.5 }}
-          className="flex justify-between items-center mt-8 max-w-4xl mx-auto"
+          className="flex justify-between items-center mt-8 max-w-2xl mx-auto"
         >
-          <button
+          <motion.button
             onClick={handlePreviousStep}
             disabled={getPreviousStep(currentStep) === null}
+            whileHover={{ x: -3 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
             className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all ${
               getPreviousStep(currentStep) === null
                 ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
@@ -232,7 +227,7 @@ function App() {
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Anterior</span>
-          </button>
+          </motion.button>
 
           <div className="flex items-center space-x-2 text-sm text-gray-600">
             {!canProceed && (
@@ -242,24 +237,29 @@ function App() {
             )}
           </div>
 
-          <button
+          <motion.button
             onClick={handleNextStep}
             disabled={!canProceed}
-            className={`flex items-center space-x-2 px-6 py-3 rounded-xl font-medium transition-all ${
+            whileHover={{ x: 3, scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+            className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-medium transition-all ${
               canProceed
-                ? 'bg-gradient-to-r from-teal-500 to-blue-500 text-white shadow-lg hover:shadow-xl'
-                : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                ? 'bg-gray-900 text-white hover:bg-gray-800'
+                : 'bg-gray-100 text-gray-300 cursor-not-allowed'
             }`}
           >
             <span>
               {currentStep === 'product-selection' ? 'Ver Resultados' : 'Siguiente'}
             </span>
             {canProceed ? (
-              <ArrowRight className="w-5 h-5" />
+              <motion.div animate={{ x: [0, 3, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}>
+                <ArrowRight className="w-5 h-5" />
+              </motion.div>
             ) : (
               <div className="w-5 h-5 border-2 border-gray-400 border-t-transparent rounded-full animate-spin" />
             )}
-          </button>
+          </motion.button>
         </motion.div>
       </div>
     </div>
