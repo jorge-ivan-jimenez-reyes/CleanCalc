@@ -2,7 +2,6 @@ import { FlowStep, FlowState, StepValidation, Product, LaundryStats } from '../t
 
 export const FLOW_STEPS: FlowStep[] = [
   'welcome',
-  'laundry-habits', 
   'product-selection',
   'results-reveal',
   'comparison'
@@ -36,22 +35,17 @@ export const validateStep = (
   switch (step) {
     case 'welcome':
       return { isValid: true };
-      
-    case 'laundry-habits':
-      const isValidHabits = laundryStats.loadsPerWeek > 0;
-      return {
-        isValid: isValidHabits,
-        message: isValidHabits ? undefined : 'Debes ingresar al menos 1 carga por semana'
-      };
-      
+
     case 'product-selection':
       const hasMinProducts = products.length >= 1;
-      const allProductsConfigured = products.every(p => 
+      const allProductsConfigured = products.every(p =>
         p.duration && p.name.trim() !== ''
       );
+      const hasValidLoads = laundryStats.loadsPerWeek > 0;
       return {
-        isValid: hasMinProducts && allProductsConfigured,
-        message: !hasMinProducts ? 'Selecciona al menos 1 producto para continuar' : 
+        isValid: hasMinProducts && allProductsConfigured && hasValidLoads,
+        message: !hasValidLoads ? 'Debes ingresar al menos 1 carga por semana' :
+                 !hasMinProducts ? 'Selecciona al menos 1 producto para continuar' :
                  !allProductsConfigured ? 'Completa la duración de todos los productos' : undefined
       };
       
@@ -68,8 +62,6 @@ export const getStepTitle = (step: FlowStep): string => {
   switch (step) {
     case 'welcome':
       return '¡Bienvenido!';
-    case 'laundry-habits':
-      return 'Tus Hábitos de Lavado';
     case 'product-selection':
       return 'Selecciona tus Productos';
     case 'results-reveal':
@@ -85,8 +77,6 @@ export const getStepDescription = (step: FlowStep): string => {
   switch (step) {
     case 'welcome':
       return '¿Sabías que puedes ahorrar hasta 60% en gastos de lavandería?';
-    case 'laundry-habits':
-      return 'Cuéntanos sobre tus hábitos de lavado para calcular tus gastos';
     case 'product-selection':
       return 'Selecciona los productos que usas actualmente';
     case 'results-reveal':

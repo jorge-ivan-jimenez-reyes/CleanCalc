@@ -56,7 +56,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({ onContinue }) => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 0.5 }}
         >
-          Compara tus productos actuales con GECO — el detergente todo-en-uno que ahorra agua, tiempo y elimina quimicos.
+          Compara tus productos actuales con GECO — el producto todo-en-uno que ahorra agua, tiempo y elimina quimicos.
         </motion.p>
 
         {/* Visual: mini before/after comparison */}

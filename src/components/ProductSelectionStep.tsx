@@ -103,7 +103,7 @@ const ProductSelectionStep: React.FC<ProductSelectionStepProps> = ({
       </div>
 
       <p className="text-sm text-gray-400 mb-5">
-        Selecciona todo lo que usas al lavar. GECO reemplaza todos estos productos.
+        Selecciona todo lo que usas para lavar y cuánto te dura.
       </p>
 
       {/* Selected products with price */}

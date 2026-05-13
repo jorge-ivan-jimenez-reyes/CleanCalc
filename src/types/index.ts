@@ -74,7 +74,7 @@ export const getDurationInWeeks = (duration: string): number => {
 };
 
 // Nuevos tipos para el sistema de pasos
-export type FlowStep = 'welcome' | 'laundry-habits' | 'product-selection' | 'product-config' | 'results-reveal' | 'comparison';
+export type FlowStep = 'welcome' | 'product-selection' | 'product-config' | 'results-reveal' | 'comparison';
 
 export interface FlowState {
   currentStep: FlowStep;

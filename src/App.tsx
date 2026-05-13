@@ -14,6 +14,7 @@ import ProductForm from './components/ProductForm';
 import ResultsReveal from './components/ResultsReveal';
 import AnimatedComparison from './components/AnimatedComparison';
 import AnimatedBackground from './components/AnimatedBackground';
+import IntegraWatermark from './components/IntegraWatermark';
 
 // Iconos
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
@@ -35,7 +36,6 @@ function App() {
   // Validaciones para cada paso
   const [stepValidations, setStepValidations] = useState<Record<string, boolean>>({
     'welcome': true,
-    'laundry-habits': false,
     'product-selection': false,
     'product-config': false,
     'results-reveal': true,
@@ -124,7 +124,6 @@ function App() {
       case 'welcome':
         return <WelcomeScreen onContinue={handleNextStep} />;
 
-      case 'laundry-habits':
       case 'product-selection':
         return (
           <div className="max-w-2xl mx-auto">
@@ -178,6 +177,7 @@ function App() {
             {renderStepContent()}
           </motion.div>
         </AnimatePresence>
+        <IntegraWatermark />
       </>
     );
   }
@@ -262,6 +262,7 @@ function App() {
           </motion.button>
         </motion.div>
       </div>
+      <IntegraWatermark />
     </div>
   );
 }
